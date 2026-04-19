@@ -143,7 +143,7 @@ export default function FAQSection() {
                 </p>
 
                 <a 
-                  href="#contact" 
+                  href="/contact" 
                   className="group inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-4 text-sm font-bold text-white transition-all hover:border-orange-500/50 hover:bg-orange-500/10"
                 >
                   <MessageCircle size={18} className="text-orange-500" />

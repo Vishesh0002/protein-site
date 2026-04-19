@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Calculator,
+  ChevronDown,
   Mail,
   Menu,
   ShoppingBag,
@@ -33,6 +34,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileBrandsOpen, setMobileBrandsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { openCart, getItemCount } = useCart();
   const itemCount = mounted ? getItemCount() : 0;
@@ -208,12 +210,75 @@ export default function Navbar() {
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="fixed top-[72px] right-0 left-0 z-40 flex flex-col border-b border-white/[0.06] bg-neutral-950/95 px-6 pt-2 pb-6 backdrop-blur-2xl lg:hidden"
           >
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0 }}
+              className="border-b border-white/[0.06]"
+            >
+              <button
+                type="button"
+                onClick={() => setMobileBrandsOpen((open) => !open)}
+                className="flex w-full items-center justify-between py-4 text-left text-lg font-semibold text-white/60 transition-colors hover:text-orange-400"
+              >
+                <span className="flex items-center gap-3">
+                  <Tag size={18} />
+                  Brands
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform ${mobileBrandsOpen ? "rotate-180 text-orange-400" : ""}`}
+                />
+              </button>
+
+              <AnimatePresence initial={false}>
+                {mobileBrandsOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="grid gap-2 pb-4">
+                      {BRANDS.map((brand) => (
+                        <Link
+                          key={brand.slug}
+                          href={`/shop?brand=${brand.slug}`}
+                          onClick={() => {
+                            setActiveLink("Shop");
+                            setMenuOpen(false);
+                            setMobileBrandsOpen(false);
+                          }}
+                          className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5 transition-all hover:border-orange-500/30 hover:bg-white/[0.05]"
+                        >
+                          <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-white/10 to-white/[0.02]">
+                            <Image
+                              src={brand.image}
+                              alt={brand.name}
+                              fill
+                              className="object-contain p-1.5"
+                              unoptimized
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-bold text-white">{brand.name}</p>
+                            <p className="truncate text-xs text-white/45">{brand.tagline}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
             {navItems.map(({ label, icon: Icon, href, disabled }, index) => (
               <motion.div
                 key={label}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: (index + 1) * 0.05 }}
               >
                 {disabled ? (
                   <button
@@ -243,7 +308,6 @@ export default function Navbar() {
               </motion.div>
             ))}
 
-            {/* Contact Us in mobile menu */}
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -257,12 +321,19 @@ export default function Navbar() {
                 <Mail size={18} />
                 Contact Us
               </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: navItems.length * 0.05 }}
+            >
               <button
                 type="button"
                 disabled
                 aria-disabled="true"
                 title="Coming soon"
-                className="mt-4 flex pointer-events-none items-center justify-center rounded-lg bg-orange-600 py-3 text-lg font-bold text-white"
+                className="mt-4 flex w-full pointer-events-none items-center justify-center rounded-lg bg-orange-600 py-3 text-lg font-bold text-white"
               >
                 Login / Sign Up
               </button>

@@ -33,7 +33,7 @@ type Product = {
   reviews: number;
   inStock: boolean;
   goal: string;
-  company: string;
+  Brands: string;
 };
 
 const PRODUCTS: Product[] = [
@@ -50,7 +50,7 @@ const PRODUCTS: Product[] = [
     rating: 4.8,
     reviews: 1243,
     inStock: true,
-    company: "Front Runner",
+    Brands: "Front Runner",
   },
   {
     id: "product-2",
@@ -65,7 +65,7 @@ const PRODUCTS: Product[] = [
     rating: 4.9,
     reviews: 2871,
     inStock: true,
-    company: "Front Runner",
+    Brands: "Front Runner",
   },
   {
     id: "product-3",
@@ -79,7 +79,7 @@ const PRODUCTS: Product[] = [
     rating: 4.7,
     reviews: 892,
     inStock: true,
-    company: "Front Runner",
+    Brands: "Front Runner",
   },
   {
     id: "product-4",
@@ -94,7 +94,7 @@ const PRODUCTS: Product[] = [
     rating: 4.6,
     reviews: 421,
     inStock: true,
-    company: "Front Runner",
+    Brands: "Front Runner",
   },
 ];
 
@@ -165,7 +165,7 @@ function ShopPageInner() {
     let list = PRODUCTS.filter((p) => {
       if (query && !p.title.toLowerCase().includes(query.toLowerCase())) return false;
       if (selectedGoals.length > 0 && !selectedGoals.includes(p.goal)) return false;
-      if (selectedCompanies.length > 0 && !selectedCompanies.includes(p.company)) return false;
+      if (selectedCompanies.length > 0 && !selectedCompanies.includes(p.Brands)) return false;
       if (p.price > priceMax) return false;
       if (inStockOnly && !p.inStock) return false;
       const disc = p.mrp > p.price ? ((p.mrp - p.price) / p.mrp) * 100 : 0;
@@ -257,7 +257,7 @@ function ShopPageInner() {
                 </button>
               </div>
 
-              <Accordion title="Sort By" defaultOpen>
+              <Accordion title="Sort By">
                 <div className="space-y-1.5">
                   {[
                     { v: "featured", l: "Featured" },
@@ -340,7 +340,11 @@ function ShopPageInner() {
                 </div>
               </Accordion>
 
-              <Accordion title="Company">
+              <Accordion
+                title="Brands"
+                defaultOpen={selectedCompanies.length > 0}
+                forceOpen={selectedCompanies.length > 0}
+              >
                 <div className="space-y-1.5">
                   {COMPANIES.map((c) => (
                     <label
@@ -521,13 +525,20 @@ function ShopPageInner() {
 function Accordion({
   title,
   defaultOpen = false,
+  forceOpen = false,
   children,
 }: {
   title: string;
   defaultOpen?: boolean;
+  forceOpen?: boolean;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen]);
+
   return (
     <div className="border-b border-white/5 last:border-b-0">
       <button
