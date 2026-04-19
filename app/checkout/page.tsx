@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -20,6 +20,8 @@ import {
   Trash2,
   User,
 } from "lucide-react";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import PhoneInput from "../components/PhoneInput";
 import { useCart, formatINR, CartItem } from "../lib/store/cart";
 import { api } from "../lib/api";
 import { loadRazorpayScript, openRazorpay } from "../lib/razorpay";
@@ -205,19 +207,33 @@ export default function CheckoutPage() {
     );
   }
 
+  const stepIndex = { cart: 0, contact: 1, shipping: 2, payment: 3 }[step];
+  const progressPct = (stepIndex / 3) * 100;
+
   return (
-    <div className="min-h-screen bg-neutral-950 pt-[72px]">
-      <div className="mx-auto max-w-6xl px-4 py-8 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-950 to-neutral-900 pt-[72px]">
+      {/* Ambient gradient */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-orange-600/5 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto max-w-6xl px-4 py-8 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/"
-            className="mb-4 inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-orange-400"
+            className="group mb-4 inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-orange-400"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft
+              size={16}
+              className="transition-transform group-hover:-translate-x-1"
+            />
             Back to shopping
           </Link>
-          <h1 className="text-2xl font-bold text-white md:text-3xl">Checkout</h1>
+          <h1 className="text-3xl font-black tracking-tight text-white md:text-4xl">
+            Checkout
+          </h1>
           <p className="mt-1 text-white/50">Complete your purchase securely</p>
         </div>
 
@@ -225,38 +241,81 @@ export default function CheckoutPage() {
           {/* Main Content */}
           <div className="space-y-6">
             {/* Progress Steps */}
-            <div className="flex items-center gap-2">
-              {[
-                { id: "cart", label: "Cart", icon: ShoppingBag },
-                { id: "contact", label: "Contact", icon: User },
-                { id: "shipping", label: "Shipping", icon: MapPin },
-                { id: "payment", label: "Payment", icon: CreditCard },
-              ].map((s, i) => {
-                const Icon = s.icon;
-                const isActive = step === s.id;
-                const isDone =
-                  (step === "contact" && s.id === "cart") ||
-                  (step === "shipping" && (s.id === "cart" || s.id === "contact")) ||
-                  (step === "payment" && s.id !== "payment");
+            <div className="relative">
+              {/* Progress line background */}
+              <div className="absolute left-0 right-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-white/5" />
+              {/* Progress line fill */}
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPct}%` }}
+                transition={{ type: "spring", damping: 20, stiffness: 140 }}
+                className="absolute left-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-orange-400"
+              />
 
-                return (
-                  <div key={s.id} className="flex items-center">
-                    <div
-                      className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all ${
-                        isActive
-                          ? "bg-orange-600 text-white"
-                          : isDone
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "bg-white/5 text-white/40"
-                      }`}
-                    >
-                      {isDone ? <Check size={14} /> : <Icon size={14} />}
-                      <span className="hidden sm:inline">{s.label}</span>
+              <div className="relative flex items-center justify-between">
+                {[
+                  { id: "cart", label: "Cart", icon: ShoppingBag },
+                  { id: "contact", label: "Contact", icon: User },
+                  { id: "shipping", label: "Shipping", icon: MapPin },
+                  { id: "payment", label: "Payment", icon: CreditCard },
+                ].map((s) => {
+                  const Icon = s.icon;
+                  const isActive = step === s.id;
+                  const idx = { cart: 0, contact: 1, shipping: 2, payment: 3 }[
+                    s.id as CheckoutStep
+                  ];
+                  const isDone = idx < stepIndex;
+
+                  return (
+                    <div key={s.id} className="flex flex-col items-center gap-1.5">
+                      <motion.div
+                        animate={{
+                          scale: isActive ? 1.1 : 1,
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                          isActive
+                            ? "bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/40 ring-4 ring-orange-500/20"
+                            : isDone
+                            ? "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-md shadow-emerald-500/30"
+                            : "bg-neutral-900 ring-2 ring-white/10"
+                        }`}
+                      >
+                        {isDone ? (
+                          <Check size={16} className="text-white" />
+                        ) : (
+                          <Icon
+                            size={16}
+                            className={isActive ? "text-white" : "text-white/40"}
+                          />
+                        )}
+                        {isActive && (
+                          <motion.span
+                            className="absolute inset-0 rounded-full bg-orange-500/30"
+                            animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        )}
+                      </motion.div>
+                      <span
+                        className={`hidden text-[11px] font-semibold tracking-wide sm:inline ${
+                          isActive
+                            ? "text-orange-300"
+                            : isDone
+                            ? "text-emerald-400"
+                            : "text-white/40"
+                        }`}
+                      >
+                        {s.label}
+                      </span>
                     </div>
-                    {i < 3 && <ChevronRight size={16} className="mx-1 text-white/20" />}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
 
             {/* Step Content */}
@@ -303,54 +362,99 @@ export default function CheckoutPage() {
 
           {/* Order Summary Sidebar */}
           <div className="lg:sticky lg:top-[88px] lg:h-fit">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-              <h2 className="mb-4 text-lg font-bold text-white">Order Summary</h2>
-              
-              <div className="mb-4 max-h-[200px] overflow-y-auto space-y-3">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-white/5">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-contain p-2"
-                        unoptimized
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{item.title}</p>
-                      <p className="text-xs text-white/50">Qty: {item.qty}</p>
-                      <p className="text-sm font-semibold text-orange-400">
-                        {formatINR(item.price * item.qty)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-6 shadow-2xl backdrop-blur-sm"
+            >
+              {/* Glow accent */}
+              <div className="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
 
-              <div className="space-y-2 border-t border-white/10 pt-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Subtotal</span>
-                  <span className="font-medium text-white">{formatINR(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Shipping</span>
-                  <span className="font-medium text-white">
-                    {shipping === 0 ? "Free" : formatINR(shipping)}
+              <div className="relative">
+                <div className="mb-5 flex items-center justify-between">
+                  <h2 className="text-lg font-bold tracking-tight text-white">
+                    Order Summary
+                  </h2>
+                  <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/60">
+                    {items.length} {items.length === 1 ? "item" : "items"}
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-white/10 pt-2 text-lg">
-                  <span className="font-semibold text-white">Total</span>
-                  <span className="font-bold text-orange-400">{formatINR(total)}</span>
+
+                <div className="mb-5 max-h-[220px] space-y-3 overflow-y-auto pr-1">
+                  {items.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-2.5 transition-all hover:border-white/10"
+                    >
+                      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-white/10 to-white/[0.02]">
+                        <Image
+                          src={item.image}
+                          alt={item.title}
+                          fill
+                          className="object-contain p-2"
+                          unoptimized
+                        />
+                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white shadow-md">
+                          {item.qty}
+                        </span>
+                      </div>
+                      <div className="flex min-w-0 flex-1 flex-col justify-between">
+                        <p className="truncate text-sm font-semibold text-white">
+                          {item.title}
+                        </p>
+                        <p className="text-sm font-bold text-orange-400">
+                          {formatINR(item.price * item.qty)}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="space-y-2.5 border-t border-white/10 pt-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">Subtotal</span>
+                    <span className="font-medium text-white">{formatINR(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/60">Shipping</span>
+                    <span
+                      className={`font-medium ${
+                        shipping === 0 ? "text-emerald-400" : "text-white"
+                      }`}
+                    >
+                      {shipping === 0 ? "Free" : formatINR(shipping)}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-end justify-between border-t border-white/10 pt-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-white/40">Total</p>
+                      <motion.p
+                        key={total}
+                        initial={{ opacity: 0.6, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-2xl font-black tracking-tight text-white"
+                      >
+                        {formatINR(total)}
+                      </motion.p>
+                    </div>
+                    <p className="pb-1 text-[10px] text-white/40">Incl. taxes</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-2 border-t border-white/10 pt-4 text-center">
+                  <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+                    <ShieldCheck size={14} className="mx-auto mb-1 text-emerald-400" />
+                    <p className="text-[10px] text-white/50">Secure SSL</p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.02] px-3 py-2">
+                    <Package size={14} className="mx-auto mb-1 text-orange-400" />
+                    <p className="text-[10px] text-white/50">Fast shipping</p>
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-4 flex items-center gap-2 text-xs text-white/40">
-                <ShieldCheck size={14} />
-                <span>Secure SSL encryption</span>
-              </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -376,9 +480,12 @@ function CartStep({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-4"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
     >
-      <h2 className="text-xl font-bold text-white">Review Your Cart</h2>
+      <div>
+        <h2 className="text-xl font-bold tracking-tight text-white">Review Your Cart</h2>
+        <p className="mt-1 text-sm text-white/50">Make sure everything looks right</p>
+      </div>
       
       <div className="space-y-3">
         {items.map((item) => (
@@ -455,16 +562,21 @@ function ContactStep({
   onNext: () => void;
   onBack: () => void;
 }) {
-  const isValid = data.email && data.phone && data.firstName && data.lastName;
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
+  const phoneValid = !!data.phone && isValidPhoneNumber(data.phone);
+  const isValid = emailValid && phoneValid && data.firstName && data.lastName;
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-4"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
     >
-      <h2 className="text-xl font-bold text-white">Contact Information</h2>
+      <div>
+        <h2 className="text-xl font-bold tracking-tight text-white">Contact Information</h2>
+        <p className="mt-1 text-sm text-white/50">We&apos;ll use this to send order updates</p>
+      </div>
       
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
@@ -511,16 +623,10 @@ function ContactStep({
 
       <div>
         <label className="mb-1.5 block text-sm font-medium text-white/70">Phone</label>
-        <div className="relative">
-          <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-          <input
-            type="tel"
-            value={data.phone}
-            onChange={(e) => setData((d) => ({ ...d, phone: e.target.value }))}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] py-2.5 pl-10 pr-4 text-white placeholder:text-white/30 focus:border-orange-500/50 focus:outline-none"
-            placeholder="+91 98765 43210"
-          />
-        </div>
+        <PhoneInput
+          value={data.phone}
+          onChange={(phone) => setData((d) => ({ ...d, phone }))}
+        />
       </div>
 
       <div className="flex gap-3 pt-4">
@@ -555,15 +661,55 @@ function ShippingStep({
 }) {
   const addr = data.address;
   const isValid = addr.line1 && addr.city && addr.state && addr.pincode;
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [pincodeError, setPincodeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const pin = addr.pincode.trim();
+    if (!/^\d{6}$/.test(pin)) {
+      setPincodeError(null);
+      return;
+    }
+    const ctrl = new AbortController();
+    setPincodeLoading(true);
+    setPincodeError(null);
+    fetch(`https://api.postalpincode.in/pincode/${pin}`, { signal: ctrl.signal })
+      .then((r) => r.json())
+      .then((res) => {
+        const info = res?.[0];
+        if (info?.Status === "Success" && info.PostOffice?.length > 0) {
+          const po = info.PostOffice[0];
+          setData((d) => ({
+            ...d,
+            address: {
+              ...d.address,
+              city: d.address.city || po.District || po.Block || "",
+              state: d.address.state || po.State || "",
+            },
+          }));
+        } else {
+          setPincodeError("Invalid PIN code");
+        }
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") setPincodeError("Could not verify PIN");
+      })
+      .finally(() => setPincodeLoading(false));
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addr.pincode]);
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-4"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
     >
-      <h2 className="text-xl font-bold text-white">Shipping Address</h2>
+      <div>
+        <h2 className="text-xl font-bold tracking-tight text-white">Shipping Address</h2>
+        <p className="mt-1 text-sm text-white/50">Where should we deliver your order?</p>
+      </div>
       
       <div>
         <label className="mb-1.5 block text-sm font-medium text-white/70">Address Line 1</label>
@@ -596,7 +742,58 @@ function ShippingStep({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-white/70">
+          PIN Code
+          <span className="ml-2 text-xs font-normal text-white/40">
+            Auto-fills city &amp; state
+          </span>
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={addr.pincode}
+            onChange={(e) => {
+              const pin = e.target.value.replace(/\D/g, "").slice(0, 6);
+              setData((d) => ({
+                ...d,
+                address: {
+                  ...d.address,
+                  pincode: pin,
+                  // Reset city/state if pincode changes significantly
+                  ...(pin.length < 6 ? { city: "", state: "" } : {}),
+                },
+              }));
+            }}
+            className={`w-full rounded-xl border bg-white/[0.03] py-2.5 px-4 text-white placeholder:text-white/30 focus:outline-none ${
+              pincodeError
+                ? "border-red-500/50 focus:border-red-500"
+                : "border-white/10 focus:border-orange-500/50"
+            }`}
+            placeholder="400001"
+          />
+          {pincodeLoading && (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-orange-500/30 border-t-orange-500"
+            />
+          )}
+          {!pincodeLoading && /^\d{6}$/.test(addr.pincode) && !pincodeError && (
+            <Check
+              size={16}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400"
+            />
+          )}
+        </div>
+        {pincodeError && (
+          <p className="mt-1 text-xs text-red-400">{pincodeError}</p>
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-white/70">City</label>
           <input
@@ -619,18 +816,6 @@ function ShippingStep({
             }
             className="w-full rounded-xl border border-white/10 bg-white/[0.03] py-2.5 px-4 text-white placeholder:text-white/30 focus:border-orange-500/50 focus:outline-none"
             placeholder="Maharashtra"
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-white/70">PIN Code</label>
-          <input
-            type="text"
-            value={addr.pincode}
-            onChange={(e) =>
-              setData((d) => ({ ...d, address: { ...d.address, pincode: e.target.value } }))
-            }
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] py-2.5 px-4 text-white placeholder:text-white/30 focus:border-orange-500/50 focus:outline-none"
-            placeholder="400001"
           />
         </div>
       </div>
@@ -672,68 +857,121 @@ function PaymentStep({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-4"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
     >
-      <h2 className="text-xl font-bold text-white">Payment</h2>
-      
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/20">
-            <CreditCard size={20} className="text-orange-400" />
+      <div>
+        <h2 className="text-xl font-bold tracking-tight text-white">Payment</h2>
+        <p className="mt-1 text-sm text-white/50">Choose your preferred payment method</p>
+      </div>
+
+      {/* Razorpay card */}
+      <div className="group relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent p-5 ring-2 ring-orange-500/20">
+        <div className="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full bg-orange-500/20 blur-3xl transition-opacity group-hover:opacity-80" />
+
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/40">
+            <CreditCard size={22} className="text-white" />
           </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <p className="font-bold text-white">Razorpay Secure Checkout</p>
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-400">
+                Recommended
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-white/60">
+              Cards · UPI · NetBanking · Wallets · EMI
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {["Visa", "Mastercard", "RuPay", "UPI", "Paytm"].map((b) => (
+                <span
+                  key={b}
+                  className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-white/70"
+                >
+                  {b}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Amount summary */}
+      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium text-white">Razorpay Secure Checkout</p>
-            <p className="text-xs text-white/50">Cards, UPI, NetBanking, Wallets</p>
+            <p className="text-xs uppercase tracking-wider text-white/50">Amount to pay</p>
+            <p className="mt-1 text-3xl font-black tracking-tight text-white">
+              {formatINR(total)}
+            </p>
           </div>
-        </div>
-        
-        <div className="space-y-2 border-t border-white/10 pt-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-white/60">Amount to pay</span>
-            <span className="font-bold text-white">{formatINR(total)}</span>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] ring-1 ring-white/10">
+            <ShieldCheck size={24} className="text-emerald-400" />
           </div>
         </div>
       </div>
 
-      <div className="flex items-start gap-2 text-xs text-white/40">
-        <ShieldCheck size={14} className="mt-0.5 shrink-0" />
-        <p>
-          Your payment is secured by Razorpay. We do not store your card details. 
-          All transactions are encrypted with 256-bit SSL.
-        </p>
+      {/* Trust indicators */}
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { icon: ShieldCheck, label: "256-bit SSL" },
+          { icon: CreditCard, label: "PCI Secure" },
+          { icon: Check, label: "PCI DSS" },
+        ].map((t) => {
+          const I = t.icon;
+          return (
+            <div
+              key={t.label}
+              className="flex flex-col items-center gap-1 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5"
+            >
+              <I size={14} className="text-emerald-400" />
+              <p className="text-[10px] font-medium text-white/60">{t.label}</p>
+            </div>
+          );
+        })}
       </div>
 
-      {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-2">
         <button
           onClick={onBack}
           disabled={isProcessing}
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-6 py-3 font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50"
+          className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50"
         >
           Back
         </button>
         <button
           onClick={onPlaceOrder}
           disabled={isProcessing}
-          className="flex-1 rounded-xl bg-orange-600 py-3 font-semibold text-white transition-all hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+          className="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 py-3.5 font-bold text-white shadow-lg shadow-orange-500/30 transition-all hover:shadow-orange-500/50 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
         >
-          {isProcessing ? (
-            <span className="flex items-center justify-center gap-2">
-              <motion.span
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="inline-block h-4 w-4 border-2 border-white/30 border-t-white rounded-full"
-              />
-              Processing...
-            </span>
-          ) : (
-            `Pay ${formatINR(total)}`
-          )}
+          <span className="relative z-10">
+            {isProcessing ? (
+              <span className="flex items-center justify-center gap-2">
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="inline-block h-4 w-4 rounded-full border-2 border-white/30 border-t-white"
+                />
+                Processing...
+              </span>
+            ) : (
+              `Pay ${formatINR(total)}`
+            )}
+          </span>
+          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
         </button>
       </div>
     </motion.div>
