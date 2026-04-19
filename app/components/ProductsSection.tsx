@@ -28,7 +28,7 @@ const products: Product[] = [
   {
     id: "product-1",
     title: "Body Mass Gainer",
-    tag: "Mass Gainer",
+    tag: "Bulk Up",
     image: "/image/1.png",
     gradient: "from-orange-500/30 via-orange-600/20 to-amber-500/10",
     price: 4599,
@@ -37,8 +37,8 @@ const products: Product[] = [
   },
   {
     id: "product-2",
-    title: "Creatine Monohydrate 250g",
-    tag: "Performance",
+    title: "Whey Protein 100%",
+    tag: "Recovery",
     image: "/image/2.png",
     gradient: "from-purple-500/25 via-pink-500/15 to-orange-500/10",
     price: 1199,
@@ -47,8 +47,8 @@ const products: Product[] = [
   },
   {
     id: "product-3",
-    title: "Super Mass Gainer 3kg",
-    tag: "Bulk Up",
+    title: "Pre Workout",
+    tag: "Perfomance",
     image: "/image/3.png?v=2",
     gradient: "from-amber-500/30 via-yellow-500/20 to-orange-600/10",
     price: 2299,
@@ -56,7 +56,7 @@ const products: Product[] = [
   },
   {
     id: "product-4",
-    title: "Daily Multivitamin 60 Tabs",
+    title: "Nitro Blast",
     tag: "Daily Health",
     image: "/image/4.png",
     gradient: "from-emerald-500/25 via-teal-500/15 to-cyan-500/10",

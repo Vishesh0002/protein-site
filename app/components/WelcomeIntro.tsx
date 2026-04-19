@@ -107,7 +107,7 @@ export default function WelcomeIntro({ duration = 3200 }: WelcomeIntroProps) {
                 transition={{ duration: 1, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 className="whitespace-nowrap bg-gradient-to-r from-orange-300 via-orange-500 to-amber-400 bg-clip-text text-[clamp(1.75rem,7vw,6rem)] font-black leading-[0.95] tracking-tight text-transparent"
               >
-                BODYBUILDING
+                BODY BUILDING
               </motion.h1>
             </div>
 
