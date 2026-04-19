@@ -10,7 +10,9 @@ import {
   Tag,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import { useCart } from "../lib/store/cart";
 
 type Product = {
   id: string;
@@ -73,6 +75,7 @@ function formatINR(n: number) {
 function ProductCard({ product, index }: { product: Product; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [liked, setLiked] = useState(false);
+  const { addItem, openCart } = useCart();
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -207,14 +210,38 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
 
           {/* Actions (anchored to bottom) */}
           <div className="mt-auto flex flex-col gap-2 pt-4">
-            <button className="group/btn relative flex items-center justify-center gap-2 overflow-hidden rounded-xl border border-white/15 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white transition-all duration-200 hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-orange-400 active:scale-[0.98]">
+            <button
+              onClick={() => {
+                addItem({
+                  id: product.id,
+                  title: product.title,
+                  image: product.image,
+                  price: product.price,
+                  mrp: product.mrp,
+                });
+                openCart();
+              }}
+              className="group/btn relative flex items-center justify-center gap-2 overflow-hidden rounded-xl border border-white/15 bg-white/[0.03] px-4 py-3 text-sm font-bold text-white transition-all duration-200 hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-orange-400 active:scale-[0.98]"
+            >
               <ShoppingCart size={15} />
               Add to Cart
             </button>
-            <button className="group/btn relative flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:shadow-orange-500/40 active:scale-[0.98]">
+            <Link
+              href="/checkout"
+              onClick={() =>
+                addItem({
+                  id: product.id,
+                  title: product.title,
+                  image: product.image,
+                  price: product.price,
+                  mrp: product.mrp,
+                })
+              }
+              className="group/btn relative flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:shadow-orange-500/40 active:scale-[0.98]"
+            >
               <span className="relative z-10">Buy Now</span>
               <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full" />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
