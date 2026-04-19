@@ -128,10 +128,13 @@ export default function Navbar() {
           {/* Right Actions */}
           <div className="flex items-center gap-2 shrink-0">
             {/* Contact Us */}
-            <button className="hidden items-center gap-1.5 rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-all duration-200 hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-400 lg:flex">
+            <Link
+              href="/contact"
+              className="hidden items-center gap-1.5 rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-white/60 transition-all duration-200 hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-400 lg:flex"
+            >
               <Mail size={13} />
               Contact Us
-            </button>
+            </Link>
 
             {/* Cart */}
             <button
@@ -203,16 +206,20 @@ export default function Navbar() {
             ))}
 
             {/* Contact Us in mobile menu */}
-            <motion.button
+            <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: navItems.length * 0.05 }}
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 py-4 text-lg font-semibold text-orange-400"
             >
-              <Mail size={18} />
-              Contact Us
-            </motion.button>
+              <Link
+                href="/contact"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 py-4 text-lg font-semibold text-orange-400"
+              >
+                <Mail size={18} />
+                Contact Us
+              </Link>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
