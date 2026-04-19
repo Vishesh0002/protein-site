@@ -14,7 +14,7 @@ import {
 const benefits = [
   {
     icon: Dumbbell,
-    title: "25g Pure Protein",
+    title: "24g Pure Protein",
     desc: "Micro-filtered whey isolate for maximum absorption and zero bloating. Fuel your recovery instantly.",
     color: "from-orange-500 to-red-500",
   },
@@ -44,8 +44,8 @@ const benefits = [
   },
   {
     icon: Award,
-    title: "NSF Certified",
-    desc: "The gold standard of supplement testing. Trusted by professional and Olympic athletes worldwide.",
+    title: "FSSAI Certified",
+    desc: "Backed by FSSAI certification, meeting stringent safety, hygiene, and quality regulations for trusted consumption.",
     color: "from-cyan-400 to-blue-500",
   },
 ];

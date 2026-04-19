@@ -6,20 +6,20 @@ import { Plus, MessageCircle } from "lucide-react";
 
 const faqs = [
   {
-    q: "When is the best time to take PROMAX?",
+    q: "When is the best time to take our Protein?",
     a: "Within 30 minutes post-workout is optimal. You can also use it as a high-protein snack between meals or first thing in the morning to kickstart muscle protein synthesis.",
   },
   {
-    q: "Is PROMAX suitable for vegetarians?",
+    q: "Is our Products suitable for vegetarians?",
     a: "Yes. Our whey isolate is derived from grass-fed milk, making it entirely suitable for vegetarians. However, because it contains dairy, it is not suitable for vegans.",
   },
   {
-    q: "How many servings are in each tub?",
-    a: "Each tub contains exactly 30 servings (960g total). One standard serving is a 32g scoop, which we recommend mixing with 250-300ml of cold water or your preferred milk.",
+    q: "How many servings are in each container?",
+    a: "Each tub contains exactly 57 servings. One standard serving is a 35g scoop, which we recommend mixing with 250-300ml of cold water or your preferred milk.",
   },
   {
-    q: "Does PROMAX contain any banned substances?",
-    a: "Absolutely not. PROMAX is rigorously NSF Certified for Sport. This means every single batch is independently tested and verified to be free of over 270 banned substances.",
+    q: "Does our Products contain any banned substances?",
+    a: "Absolutely not. Our Products are rigorously FSSAI Certified. This means every single batch is independently tested and verified to be free of over 270 banned substances.",
   },
 ];
 

@@ -5,11 +5,11 @@ import { Award, CheckCircle, Dumbbell, FlaskConical, Shield, Zap } from "lucide-
 
 const items = [
   { icon: Shield, text: "Third-Party Tested" },
-  { icon: Award, text: "NSF Certified" },
+  { icon: Award, text: "FSSAI Certified" },
   { icon: Zap, text: "Fast Absorption" },
   { icon: CheckCircle, text: "Zero Sugar" },
   { icon: FlaskConical, text: "Clinically Dosed" },
-  { icon: Dumbbell, text: "25g Protein" },
+  { icon: Dumbbell, text: "24g Protein" },
 ];
 
 export default function Marquee() {

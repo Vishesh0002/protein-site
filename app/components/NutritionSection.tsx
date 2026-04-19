@@ -7,7 +7,7 @@ import { Activity, Flame, Dna, Wheat, Droplet, Ban } from "lucide-react";
 const macros = [
   {
     id: "protein",
-    value: 25,
+    value: 24,
     unit: "g",
     label: "Premium Protein",
     desc: "Ultra-filtered whey isolate for maximum bioavailability and muscle synthesis.",
@@ -18,7 +18,7 @@ const macros = [
   },
   {
     id: "calories",
-    value: 120,
+    value: 142,
     unit: "",
     label: "Calories",
     desc: "Ultra-lean macro profile.",
@@ -40,7 +40,7 @@ const macros = [
   },
   {
     id: "carbs",
-    value: 3,
+    value: 7,
     unit: "g",
     label: "Total Carbs",
     desc: "Low glycemic impact.",
@@ -51,7 +51,7 @@ const macros = [
   },
   {
     id: "fat",
-    value: 1.5,
+    value: 2,
     unit: "g",
     label: "Total Fat",
     desc: "Trace healthy fats.",
