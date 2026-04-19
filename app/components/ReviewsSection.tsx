@@ -26,7 +26,7 @@ const reviews = [
     role: "Marathon Runner",
     avatar: "J",
     rating: 5,
-    text: "25g with only 120 calories — the macros are absolutely insane for the price. Never looking back.",
+    text: "24g with only 142 calories — the macros are absolutely insane for the price. Never looking back.",
     verified: true,
   },
   {
@@ -34,7 +34,7 @@ const reviews = [
     role: "Olympic Weightlifter",
     avatar: "A",
     rating: 5,
-    text: "NSF certification was non-negotiable for me. PROMAX ticks every box and tastes great too.",
+    text: "FSSAI certification was non-negotiable for me. FRONT RUNNER HEALTH CARE ticks every box and tastes great too.",
     verified: true,
   },
 ];

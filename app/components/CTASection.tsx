@@ -96,7 +96,7 @@ export default function CTASection() {
               >
                 <div className="flex items-center gap-2 text-sm text-white/60">
                   <Truck size={18} className="text-orange-500" />
-                  Free shipping over ₹5000
+                  Free shipping over ₹2000
                 </div>
                 <div className="flex items-center gap-2 text-sm text-white/60">
                   <ShieldCheck size={18} className="text-orange-500" />
