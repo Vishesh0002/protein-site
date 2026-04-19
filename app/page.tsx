@@ -1,146 +1,242 @@
 "use client";
 
-import { motion, Variants } from "framer-motion";
-import { ArrowRight, CheckCircle, Zap, Shield, Dumbbell } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
+import { Minus, Plus, ShoppingBag, X } from "lucide-react";
+import BenefitsSection from "./components/BenefitsSection";
+import CTASection from "./components/CTASection";
+import Footer from "./components/Footer";
+import FAQSection from "./components/FAQSection";
+import HeroSection from "./components/HeroSection";
+import Marquee from "./components/Marquee";
+import NutritionSection from "./components/NutritionSection";
+import ReviewsSection from "./components/ReviewsSection";
 
-// --- Animation Variants ---
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-};
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const staggerContainer: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2 }
-  }
-};
+interface CartItem {
+  flavor: string;
+  quantity: number;
+  price: number;
+}
+
+// ─── Custom Cursor ────────────────────────────────────────────────────────────
+
+function CustomCursor() {
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+  const springConfig = { damping: 25, stiffness: 700 };
+  const cursorXSpring = useSpring(cursorX, springConfig);
+  const cursorYSpring = useSpring(cursorY, springConfig);
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const moveCursor = (e: MouseEvent) => {
+      cursorX.set(e.clientX - 16);
+      cursorY.set(e.clientY - 16);
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "BUTTON" || target.tagName === "A" || target.closest("button") || target.closest("a")) {
+        setIsHovering(true);
+      }
+    };
+
+    const handleMouseOut = () => setIsHovering(false);
+
+    window.addEventListener("mousemove", moveCursor);
+    window.addEventListener("mouseover", handleMouseOver);
+    window.addEventListener("mouseout", handleMouseOut);
+
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener("mouseover", handleMouseOver);
+      window.removeEventListener("mouseout", handleMouseOut);
+    };
+  }, [cursorX, cursorY]);
+
+  return (
+    <motion.div
+      className="pointer-events-none fixed left-0 top-0 z-[9999] hidden h-8 w-8 mix-blend-difference md:block"
+      style={{ x: cursorXSpring, y: cursorYSpring }}
+    >
+      <motion.div
+        className="h-full w-full rounded-full bg-white"
+        animate={{ scale: isHovering ? 1.5 : 1 }}
+        transition={{ type: "spring", stiffness: 500, damping: 28 }}
+      />
+    </motion.div>
+  );
+}
+
+// ─── Cart Drawer ──────────────────────────────────────────────────────────────
+
+function CartDrawer({
+  isOpen,
+  onClose,
+  items,
+  onUpdateQuantity,
+  onRemove,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  items: CartItem[];
+  onUpdateQuantity: (flavor: string, delta: number) => void;
+  onRemove: (flavor: string) => void;
+}) {
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-md bg-[#0c0c0c] shadow-2xl"
+          >
+            <div className="flex h-full flex-col">
+              <div className="flex items-center justify-between border-b border-white/10 p-6">
+                <h2 className="text-lg font-bold text-white">Your Cart</h2>
+                <button
+                  onClick={onClose}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 transition-colors hover:bg-white/10"
+                >
+                  <X size={18} className="text-white/70" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-auto p-6">
+                {items.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <ShoppingBag size={48} className="mb-4 text-white/20" />
+                    <p className="text-white/40">Your cart is empty</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {items.map((item) => (
+                      <motion.div
+                        key={item.flavor}
+                        layout
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -100 }}
+                        className="flex items-center gap-4 rounded-2xl bg-white/5 p-4"
+                      >
+                        <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-600/20" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-white">{item.flavor}</p>
+                          <p className="text-sm text-white/40">${item.price}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => onUpdateQuantity(item.flavor, -1)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 transition-colors hover:bg-white/10"
+                          >
+                            <Minus size={14} className="text-white/70" />
+                          </button>
+                          <span className="w-8 text-center text-sm font-medium text-white">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => onUpdateQuantity(item.flavor, 1)}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 transition-colors hover:bg-white/10"
+                          >
+                            <Plus size={14} className="text-white/70" />
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => onRemove(item.flavor)}
+                          className="text-white/30 transition-colors hover:text-red-400"
+                        >
+                          <X size={16} />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {items.length > 0 && (
+                <div className="border-t border-white/10 p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="text-white/50">Subtotal</span>
+                    <span className="text-xl font-bold text-white">${total.toFixed(2)}</span>
+                  </div>
+                  <button className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 py-4 font-bold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]">
+                    Checkout
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const addToCart = (flavor: string = "Chocolate Fudge") => {
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.flavor === flavor);
+      if (existing) {
+        return prev.map((item) =>
+          item.flavor === flavor ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prev, { flavor, quantity: 1, price: 49 }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const updateQuantity = (flavor: string, delta: number) => {
+    setCartItems((prev) =>
+      prev
+        .map((item) =>
+          item.flavor === flavor ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const removeItem = (flavor: string) => {
+    setCartItems((prev) => prev.filter((item) => item.flavor !== flavor));
+  };
+
   return (
-    <div className="min-h-screen bg-neutral-950 text-white overflow-hidden">
-      
-      {/* Navbar */}
-      <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="text-2xl font-black tracking-tighter text-orange-500"
-        >
-          FRONT RUNNER HEALTH <span className="text-white"> CARE</span>
-        </motion.div>
-        <motion.ul 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="hidden md:flex gap-8 font-medium text-neutral-300"
-        >
-          <li className="hover:text-orange-500 cursor-pointer transition-colors">Shop</li>
-          <li className="hover:text-orange-500 cursor-pointer transition-colors">Science</li>
-          <li className="hover:text-orange-500 cursor-pointer transition-colors">About</li>
-        </motion.ul>
-        <motion.button 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-orange-500 hover:text-white transition-colors"
-        >
-          Cart (0)
-        </motion.button>
-      </nav>
-
-      {/* Hero Section */}
-      <main className="relative max-w-7xl mx-auto px-6 pt-20 pb-32 flex flex-col lg:flex-row items-center justify-between">
-        
-        {/* Text Content */}
-        <div className="lg:w-1/2 z-10">
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="flex flex-col gap-6"
-          >
-            <motion.div variants={fadeInUp} className="flex items-center gap-2 text-orange-500 font-semibold uppercase tracking-widest text-sm">
-              <Zap size={16} /> Premium Isolate Blend
-            </motion.div>
-            
-            <motion.h1 variants={fadeInUp} className="text-6xl md:text-8xl font-black leading-[0.9] tracking-tighter">
-              FUEL YOUR <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
-                POTENTIAL
-              </span>
-            </motion.h1>
-            
-            <motion.p variants={fadeInUp} className="text-lg text-neutral-400 max-w-md mt-4">
-              Clinically dosed, zero sugar, and fast-absorbing whey isolate to help you build muscle and recover faster than ever.
-            </motion.p>
-            
-            <motion.div variants={fadeInUp} className="flex gap-4 mt-8">
-              <button className="bg-orange-600 hover:bg-orange-500 text-white px-8 py-4 rounded-full font-bold text-lg flex items-center gap-2 transition-transform hover:scale-105">
-                Shop Now <ArrowRight size={20} />
-              </button>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Animated Product Image */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-          className="lg:w-1/2 mt-16 lg:mt-0 relative"
-        >
-          {/* Background Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-600/30 blur-[100px] rounded-full z-0"></div>
-          
-          <motion.img 
-            animate={{ y: [0, -20, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-            src="https://images.unsplash.com/photo-1593095948071-474c5cc2989d?q=80&w=2070&auto=format&fit=crop" 
-            alt="Protein Tub Placeholder" 
-            className="relative z-10 w-full max-w-lg mx-auto rounded-3xl shadow-2xl object-cover h-[500px]"
-          />
-        </motion.div>
-      </main>
-
-      {/* Benefits Section */}
-      <section className="bg-neutral-900 py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-3 gap-12"
-          >
-            {/* Benefit 1 */}
-            <motion.div variants={fadeInUp} className="flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 bg-orange-500/20 text-orange-500 rounded-full flex items-center justify-center mb-2">
-                <Dumbbell size={32} />
-              </div>
-              <h3 className="text-2xl font-bold">25g Pure Protein</h3>
-              <p className="text-neutral-400">Micro-filtered whey isolate for maximum absorption and zero bloating.</p>
-            </motion.div>
-
-            {/* Benefit 2 */}
-            <motion.div variants={fadeInUp} className="flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 bg-orange-500/20 text-orange-500 rounded-full flex items-center justify-center mb-2">
-                <CheckCircle size={32} />
-              </div>
-              <h3 className="text-2xl font-bold">Zero Added Sugar</h3>
-              <p className="text-neutral-400">Naturally flavored and sweetened with stevia. No artificial junk.</p>
-            </motion.div>
-
-            {/* Benefit 3 */}
-            <motion.div variants={fadeInUp} className="flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 bg-orange-500/20 text-orange-500 rounded-full flex items-center justify-center mb-2">
-                <Shield size={32} />
-              </div>
-              <h3 className="text-2xl font-bold">Third-Party Tested</h3>
-              <p className="text-neutral-400">Every batch is tested for banned substances and protein accuracy.</p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-[#080808] text-white selection:bg-orange-500/30">
+      <CustomCursor />
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        items={cartItems}
+        onUpdateQuantity={updateQuantity}
+        onRemove={removeItem}
+      />
+      <HeroSection onAddToCart={addToCart} />
+      <Marquee />
+      <BenefitsSection />
+      <NutritionSection />
+      <ReviewsSection />
+      <FAQSection />
+      <CTASection />
+      <Footer />
     </div>
   );
 }
