@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import appIcon from "../icon.png";
+import { useCart } from "../lib/store/cart";
 
 const navItems = [
   { label: "Brands", icon: Tag, href: "#", disabled: true },
@@ -33,7 +34,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const { openCart, getItemCount } = useCart();
+  const itemCount = getItemCount();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -53,19 +55,16 @@ export default function Navbar() {
     return () => window.removeEventListener("hashchange", syncActiveLink);
   }, [pathname]);
 
-  const handleCartClick = () => setCartCount((prev) => prev + 1);
-
   return (
     <>
       <motion.nav
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className={`fixed top-0 left-0 right-0 z-50 px-6 transition-all duration-300 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-50 px-6 transition-all duration-300 ${scrolled
             ? "bg-neutral-950/85 shadow-[0_4px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl"
             : "bg-transparent"
-        }`}
+          }`}
       >
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between">
 
@@ -96,15 +95,14 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <ul className="hidden items-center gap-0.5 md:flex">
+          <ul className="hidden items-center gap-0.5 lg:flex">
             {navItems.map(({ label, icon: Icon, href, disabled }) => {
-              const baseClass = `relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                activeLink === label
+              const baseClass = `relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${activeLink === label
                   ? "text-white"
                   : disabled
                     ? "cursor-not-allowed text-white/30"
                     : "text-white/50 hover:bg-white/[0.05] hover:text-white/80"
-              }`;
+                }`;
               const inner = (
                 <>
                   <Icon size={13} className={activeLink === label ? "text-orange-400" : "opacity-60"} />
@@ -147,31 +145,42 @@ export default function Navbar() {
 
             {/* Cart */}
             <button
-              onClick={handleCartClick}
+              onClick={openCart}
               className="relative flex items-center gap-2 rounded-full bg-orange-600 px-4 py-2 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.03] hover:bg-orange-500 active:scale-[0.98]"
             >
               <ShoppingBag size={15} />
               <span className="hidden sm:inline">Cart</span>
               <AnimatePresence>
-                {cartCount > 0 && (
+                {itemCount > 0 && (
                   <motion.span
-                    key={cartCount}
+                    key={itemCount}
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 500, damping: 25 }}
                     className="absolute -top-1.5 -right-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-neutral-950 bg-white text-[10px] font-black text-orange-600"
                   >
-                    {cartCount}
+                    {itemCount > 9 ? "9+" : itemCount}
                   </motion.span>
                 )}
               </AnimatePresence>
             </button>
+              <Link
+                href="/login"
+                className="hidden lg:flex relative items-center gap-3 rounded-full bg-orange-600 px-4 py-2 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.03] hover:bg-orange-500 active:scale-[0.98]"
+              >
+                Login / Sign Up
+              </Link>
+            
+          
+
+
+
 
             {/* Hamburger */}
             <button
               onClick={() => setMenuOpen((open) => !open)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-white/70 transition-all duration-200 hover:bg-white/[0.06] hover:text-white md:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-white/70 transition-all duration-200 hover:bg-white/[0.06] hover:text-white lg:hidden"
             >
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -187,7 +196,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-[72px] right-0 left-0 z-40 flex flex-col border-b border-white/[0.06] bg-neutral-950/95 px-6 pt-2 pb-6 backdrop-blur-2xl md:hidden"
+            className="fixed top-[72px] right-0 left-0 z-40 flex flex-col border-b border-white/[0.06] bg-neutral-950/95 px-6 pt-2 pb-6 backdrop-blur-2xl lg:hidden"
           >
             {navItems.map(({ label, icon: Icon, href, disabled }, index) => (
               <motion.div
@@ -212,11 +221,10 @@ export default function Navbar() {
                       setActiveLink(label);
                       setMenuOpen(false);
                     }}
-                    className={`flex items-center gap-3 border-b border-white/[0.06] py-4 text-lg font-semibold transition-colors ${
-                      activeLink === label
+                    className={`flex items-center gap-3 border-b border-white/[0.06] py-4 text-lg font-semibold transition-colors ${activeLink === label
                         ? "text-orange-500"
                         : "text-white/60 hover:text-orange-400"
-                    }`}
+                      }`}
                   >
                     <Icon size={18} />
                     {label}
@@ -238,6 +246,13 @@ export default function Navbar() {
               >
                 <Mail size={18} />
                 Contact Us
+              </Link>
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="mt-4 flex items-center justify-center rounded-lg bg-orange-600 py-3 text-lg font-bold text-white"
+              >
+                Login / Sign Up
               </Link>
             </motion.div>
           </motion.div>
