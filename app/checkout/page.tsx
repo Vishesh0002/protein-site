@@ -218,9 +218,9 @@ export default function CheckoutPage() {
         <div className="absolute top-1/3 right-0 h-96 w-96 rounded-full bg-orange-600/5 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-4 py-8 lg:px-8">
+      <div className="relative mx-auto max-w-6xl px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link
             href="/"
             className="group mb-4 inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-orange-400"
@@ -231,15 +231,15 @@ export default function CheckoutPage() {
             />
             Back to shopping
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-white md:text-4xl">
+          <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl md:text-4xl">
             Checkout
           </h1>
           <p className="mt-1 text-white/50">Complete your purchase securely</p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr,400px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr,400px] lg:gap-8">
           {/* Main Content */}
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             {/* Progress Steps */}
             <div className="relative">
               {/* Progress line background */}
@@ -273,7 +273,7 @@ export default function CheckoutPage() {
                           scale: isActive ? 1.1 : 1,
                         }}
                         transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                        className={`relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full transition-all ${
                           isActive
                             ? "bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/40 ring-4 ring-orange-500/20"
                             : isDone
@@ -365,7 +365,7 @@ export default function CheckoutPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-6 shadow-2xl backdrop-blur-sm"
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 shadow-2xl backdrop-blur-sm sm:p-6"
             >
               {/* Glow accent */}
               <div className="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
@@ -480,10 +480,10 @@ function CartStep({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-4 shadow-xl backdrop-blur-sm sm:p-6"
     >
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white">Review Your Cart</h2>
+        <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">Review Your Cart</h2>
         <p className="mt-1 text-sm text-white/50">Make sure everything looks right</p>
       </div>
       
@@ -492,9 +492,9 @@ function CartStep({
           <motion.div
             key={item.id}
             layout
-            className="flex gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-4"
+            className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3 sm:gap-4 sm:p-4"
           >
-            <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-white/5">
+            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-white/5 sm:h-24 sm:w-24">
               <Image
                 src={item.image}
                 alt={item.title}
@@ -503,36 +503,36 @@ function CartStep({
                 unoptimized
               />
             </div>
-            <div className="flex flex-1 flex-col justify-between">
-              <div>
-                <h3 className="font-semibold text-white">{item.title}</h3>
-                <p className="text-sm text-white/50">{formatINR(item.price)} / unit</p>
+            <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-semibold text-white sm:text-base">{item.title}</h3>
+                <p className="text-xs text-white/50 sm:text-sm">{formatINR(item.price)} / unit</p>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     onClick={() => updateQty(item.id, item.qty - 1)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/70 transition-all hover:bg-white/10"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-white/70 transition-all hover:bg-white/10 sm:h-8 sm:w-8"
                   >
                     -
                   </button>
-                  <span className="w-8 text-center font-medium text-white">{item.qty}</span>
+                  <span className="w-6 text-center text-sm font-medium text-white sm:w-8">{item.qty}</span>
                   <button
                     onClick={() => updateQty(item.id, item.qty + 1)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/70 transition-all hover:bg-white/10"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-white/70 transition-all hover:bg-white/10 sm:h-8 sm:w-8"
                   >
                     +
                   </button>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-orange-400">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-sm font-semibold text-orange-400 sm:text-base">
                     {formatINR(item.price * item.qty)}
                   </span>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-white/40 transition-all hover:bg-red-500/20 hover:text-red-400"
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition-all hover:bg-red-500/20 hover:text-red-400 sm:h-8 sm:w-8"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
@@ -571,10 +571,10 @@ function ContactStep({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-4 shadow-xl backdrop-blur-sm sm:p-6"
     >
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white">Contact Information</h2>
+        <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">Contact Information</h2>
         <p className="mt-1 text-sm text-white/50">We&apos;ll use this to send order updates</p>
       </div>
       
@@ -632,14 +632,14 @@ function ContactStep({
       <div className="flex gap-3 pt-4">
         <button
           onClick={onBack}
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-6 py-3 font-medium text-white transition-all hover:bg-white/10"
+          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white transition-all hover:bg-white/10 sm:px-6 sm:text-base"
         >
           Back
         </button>
         <button
           onClick={onNext}
           disabled={!isValid}
-          className="flex-1 rounded-xl bg-orange-600 py-3 font-semibold text-white transition-all hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+          className="flex-1 rounded-xl bg-orange-600 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98] sm:text-base"
         >
           Continue to Shipping
         </button>
@@ -704,10 +704,10 @@ function ShippingStep({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-4 shadow-xl backdrop-blur-sm sm:p-6"
     >
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white">Shipping Address</h2>
+        <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">Shipping Address</h2>
         <p className="mt-1 text-sm text-white/50">Where should we deliver your order?</p>
       </div>
       
@@ -823,14 +823,14 @@ function ShippingStep({
       <div className="flex gap-3 pt-4">
         <button
           onClick={onBack}
-          className="rounded-xl border border-white/10 bg-white/[0.03] px-6 py-3 font-medium text-white transition-all hover:bg-white/10"
+          className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white transition-all hover:bg-white/10 sm:px-6 sm:text-base"
         >
           Back
         </button>
         <button
           onClick={onNext}
           disabled={!isValid}
-          className="flex-1 rounded-xl bg-orange-600 py-3 font-semibold text-white transition-all hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+          className="flex-1 rounded-xl bg-orange-600 py-3 text-sm font-semibold text-white transition-all hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98] sm:text-base"
         >
           Continue to Payment
         </button>
@@ -857,10 +857,10 @@ function PaymentStep({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-6 shadow-xl backdrop-blur-sm"
+      className="space-y-5 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-4 shadow-xl backdrop-blur-sm sm:p-6"
     >
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white">Payment</h2>
+        <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">Payment</h2>
         <p className="mt-1 text-sm text-white/50">Choose your preferred payment method</p>
       </div>
 
@@ -948,14 +948,14 @@ function PaymentStep({
         <button
           onClick={onBack}
           disabled={isProcessing}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-3.5 font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50"
+          className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-sm font-medium text-white transition-all hover:bg-white/10 disabled:opacity-50 sm:px-6 sm:text-base"
         >
           Back
         </button>
         <button
           onClick={onPlaceOrder}
           disabled={isProcessing}
-          className="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 py-3.5 font-bold text-white shadow-lg shadow-orange-500/30 transition-all hover:shadow-orange-500/50 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+          className="group relative flex-1 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/30 transition-all hover:shadow-orange-500/50 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98] sm:text-base"
         >
           <span className="relative z-10">
             {isProcessing ? (
