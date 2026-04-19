@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
 import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import BenefitsSection from "./components/BenefitsSection";
@@ -192,19 +192,6 @@ export default function Home() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const addToCart = (flavor: string = "Chocolate Fudge") => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.flavor === flavor);
-      if (existing) {
-        return prev.map((item) =>
-          item.flavor === flavor ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { flavor, quantity: 1, price: 49 }];
-    });
-    setIsCartOpen(true);
-  };
-
   const updateQuantity = (flavor: string, delta: number) => {
     setCartItems((prev) =>
       prev
@@ -229,7 +216,7 @@ export default function Home() {
         onUpdateQuantity={updateQuantity}
         onRemove={removeItem}
       />
-      <HeroSection onAddToCart={addToCart} />
+      <HeroSection />
       <Marquee />
       <BenefitsSection />
       <NutritionSection />

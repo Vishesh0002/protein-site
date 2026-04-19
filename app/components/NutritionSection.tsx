@@ -221,7 +221,7 @@ export default function NutritionSection() {
               Nutrition Facts
             </span>
             <h2 className="text-4xl font-black tracking-tight text-white md:text-6xl">
-              What's Inside <br />
+              What&apos;s Inside <br />
               <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
                 Every Scoop.
               </span>
