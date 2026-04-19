@@ -88,7 +88,7 @@ function ReviewCard({ review, index }: { review: typeof reviews[0]; index: numbe
         </div>
         
         <p className="mb-10 text-lg md:text-xl text-white/70 leading-relaxed font-medium">
-          "{review.text}"
+          &quot;{review.text}&quot;
         </p>
       </div>
 

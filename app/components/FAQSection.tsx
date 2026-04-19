@@ -139,7 +139,7 @@ export default function FAQSection() {
                   </span>
                 </h2>
                 <p className="text-lg text-white/50 leading-relaxed max-w-md mb-10">
-                  Everything you need to know about the product, usage, and our guarantee. Can't find the answer you're looking for?
+                  Everything you need to know about the product, usage, and our guarantee. Can&apos;t find the answer you&apos;re looking for?
                 </p>
 
                 <a 
