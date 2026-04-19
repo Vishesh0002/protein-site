@@ -16,25 +16,22 @@ import {
 import appIcon from "../icon.png";
 
 const navItems = [
-  { label: "Brands", icon: Tag, href: "/#brands" },
-  { label: "Shop", icon: ShoppingBag, href: "/#shop" },
-  { label: "Protein Calculator", icon: Calculator, href: "/protein-calculator" },
+  { label: "Brands", icon: Tag, href: "#", disabled: true },
+  { label: "Shop", icon: ShoppingBag, href: "#", disabled: true },
+  { label: "Protein Calculator", icon: Calculator, href: "/protein-calculator", disabled: false },
 ];
 
-function getActiveLink(pathname: string, hash: string) {
+function getActiveLink(pathname: string) {
   if (pathname === "/protein-calculator") {
     return "Protein Calculator";
   }
-  if (hash === "#brands") {
-    return "Brands";
-  }
-  return "Shop";
+  return "";
 }
 
 export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [activeLink, setActiveLink] = useState("Shop");
+  const [activeLink, setActiveLink] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
@@ -47,7 +44,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const syncActiveLink = () => {
-      setActiveLink(getActiveLink(pathname, window.location.hash));
+      setActiveLink(getActiveLink(pathname));
     };
 
     syncActiveLink();
@@ -75,7 +72,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            onClick={() => setActiveLink("Shop")}
+            onClick={() => setActiveLink("")}
             className="group flex shrink-0 items-center gap-3"
           >
             <div className="flex h-12 w-12 items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
@@ -100,17 +97,16 @@ export default function Navbar() {
 
           {/* Desktop Nav Links */}
           <ul className="hidden items-center gap-0.5 md:flex">
-            {navItems.map(({ label, icon: Icon, href }) => (
-              <li key={label}>
-                <Link
-                  href={href}
-                  onClick={() => setActiveLink(label)}
-                  className={`relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-                    activeLink === label
-                      ? "text-white"
-                      : "text-white/50 hover:bg-white/[0.05] hover:text-white/80"
-                  }`}
-                >
+            {navItems.map(({ label, icon: Icon, href, disabled }) => {
+              const baseClass = `relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                activeLink === label
+                  ? "text-white"
+                  : disabled
+                    ? "cursor-not-allowed text-white/30"
+                    : "text-white/50 hover:bg-white/[0.05] hover:text-white/80"
+              }`;
+              const inner = (
+                <>
                   <Icon size={13} className={activeLink === label ? "text-orange-400" : "opacity-60"} />
                   {label}
                   {activeLink === label && (
@@ -120,9 +116,22 @@ export default function Navbar() {
                       transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
                     />
                   )}
-                </Link>
-              </li>
-            ))}
+                </>
+              );
+              return (
+                <li key={label}>
+                  {disabled ? (
+                    <button type="button" disabled className={baseClass}>
+                      {inner}
+                    </button>
+                  ) : (
+                    <Link href={href} onClick={() => setActiveLink(label)} className={baseClass}>
+                      {inner}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
 
           {/* Right Actions */}
@@ -180,28 +189,39 @@ export default function Navbar() {
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="fixed top-[72px] right-0 left-0 z-40 flex flex-col border-b border-white/[0.06] bg-neutral-950/95 px-6 pt-2 pb-6 backdrop-blur-2xl md:hidden"
           >
-            {navItems.map(({ label, icon: Icon, href }, index) => (
+            {navItems.map(({ label, icon: Icon, href, disabled }, index) => (
               <motion.div
                 key={label}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <Link
-                  href={href}
-                  onClick={() => {
-                    setActiveLink(label);
-                    setMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-3 border-b border-white/[0.06] py-4 text-lg font-semibold transition-colors ${
-                    activeLink === label
-                      ? "text-orange-500"
-                      : "text-white/60 hover:text-orange-400"
-                  }`}
-                >
-                  <Icon size={18} />
-                  {label}
-                </Link>
+                {disabled ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="flex w-full cursor-not-allowed items-center gap-3 border-b border-white/[0.06] py-4 text-left text-lg font-semibold text-white/30"
+                  >
+                    <Icon size={18} />
+                    {label}
+                  </button>
+                ) : (
+                  <Link
+                    href={href}
+                    onClick={() => {
+                      setActiveLink(label);
+                      setMenuOpen(false);
+                    }}
+                    className={`flex items-center gap-3 border-b border-white/[0.06] py-4 text-lg font-semibold transition-colors ${
+                      activeLink === label
+                        ? "text-orange-500"
+                        : "text-white/60 hover:text-orange-400"
+                    }`}
+                  >
+                    <Icon size={18} />
+                    {label}
+                  </Link>
+                )}
               </motion.div>
             ))}
 

@@ -10,7 +10,9 @@ import FAQSection from "./components/FAQSection";
 import HeroSection from "./components/HeroSection";
 import Marquee from "./components/Marquee";
 import NutritionSection from "./components/NutritionSection";
+import ProductsSection from "./components/ProductsSection";
 import ReviewsSection from "./components/ReviewsSection";
+import WelcomeIntro from "./components/WelcomeIntro";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -208,6 +210,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#080808] text-white selection:bg-orange-500/30">
+      <WelcomeIntro />
       <CustomCursor />
       <CartDrawer
         isOpen={isCartOpen}
@@ -218,6 +221,7 @@ export default function Home() {
       />
       <HeroSection />
       <Marquee />
+      <ProductsSection />
       <BenefitsSection />
       <NutritionSection />
       <ReviewsSection />
