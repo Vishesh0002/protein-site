@@ -67,7 +67,7 @@ export default function HeroSection() {
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
-          className="absolute inset-0 h-full w-full min-h-full min-w-full object-cover object-center opacity-100"
+          className="absolute inset-0 h-full w-full min-h-full min-w-full object-cover object-[center_30%] opacity-100 md:object-center"
           autoPlay
           muted
           loop

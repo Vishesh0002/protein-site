@@ -45,9 +45,6 @@ const footerLinks = [
   {
     title: "Company",
     links: [
-      { label: "Our Story", href: "#" },
-      { label: "Athletes", href: "#" },
-      { label: "Careers", href: "#" },
       { label: "Contact Us", href: "#" },
     ],
   },

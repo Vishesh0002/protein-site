@@ -35,27 +35,27 @@ const LinkedinIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-type Field = "name" | "email" | "subject" | "message";
+type Field = "firstName" | "lastName" | "email" | "phone" | "message";
 
 const contactMethods = [
   {
     icon: Mail,
     label: "Email Us",
-    value: "contact@frontrunner.com",
-    href: "mailto:contact@frontrunner.com",
+    value: "frontrunner2009@gmail.com",
+    href: "frontrunner2009@gmail.com",
     hint: "We reply within 24 hours",
   },
   {
     icon: Phone,
     label: "Call Us",
-    value: "+91 123 456 7890",
-    href: "tel:+911234567890",
+    value: "+91 9997055376",
+    href: "tel:+919997055376",
     hint: "Mon–Sat, 9am to 7pm IST",
   },
   {
     icon: MapPin,
     label: "Visit Us",
-    value: "Mumbai, India",
+    value: "Rampur, India",
     href: "#",
     hint: "Head office & warehouse",
   },
@@ -120,13 +120,16 @@ function TiltCard({
 
 export default function ContactPage() {
   const [form, setForm] = useState<Record<Field, string>>({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    subject: "",
+    phone: "",
     message: "",
   });
   const [focused, setFocused] = useState<Field | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handleChange = (
@@ -135,13 +138,53 @@ export default function ContactPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setForm({ name: "", email: "", subject: "", message: "" });
-    }, 2800);
+    if (submitting) return;
+    setError(null);
+    setSubmitting(true);
+
+    const url =
+      "https://api.hsforms.com/submissions/v3/integration/submit/245955825/82164711-3c79-4504-b998-fa9a9da215eb";
+
+    const payload = {
+      fields: [
+        { objectTypeId: "0-1", name: "firstname", value: form.firstName },
+        { objectTypeId: "0-1", name: "lastname", value: form.lastName },
+        { objectTypeId: "0-1", name: "email", value: form.email },
+        { objectTypeId: "0-1", name: "phone", value: form.phone },
+        { objectTypeId: "0-1", name: "message", value: form.message },
+      ],
+      context: {
+        pageUri: typeof window !== "undefined" ? window.location.href : "",
+        pageName: "Contact | Front Runner Health Care",
+      },
+    };
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const msg =
+          data?.errors?.[0]?.message ||
+          data?.message ||
+          "Submission failed. Please try again.";
+        throw new Error(msg);
+      }
+
+      setSubmitted(true);
+      setForm({ firstName: "", lastName: "", email: "", phone: "", message: "" });
+      setTimeout(() => setSubmitted(false), 3500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const fieldProps = (name: Field) => ({
@@ -277,12 +320,23 @@ export default function ContactPage() {
                 <div className="relative">
                   <input
                     type="text"
-                    {...fieldProps("name")}
+                    {...fieldProps("firstName")}
                     className={inputClass}
                   />
-                  <label className={labelClass("name")}>Your Name</label>
+                  <label className={labelClass("firstName")}>First Name</label>
                 </div>
 
+                <div className="relative">
+                  <input
+                    type="text"
+                    {...fieldProps("lastName")}
+                    className={inputClass}
+                  />
+                  <label className={labelClass("lastName")}>Last Name</label>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-5 md:grid-cols-2">
                 <div className="relative">
                   <input
                     type="email"
@@ -291,15 +345,15 @@ export default function ContactPage() {
                   />
                   <label className={labelClass("email")}>Email Address</label>
                 </div>
-              </div>
 
-              <div className="relative mt-5">
-                <input
-                  type="text"
-                  {...fieldProps("subject")}
-                  className={inputClass}
-                />
-                <label className={labelClass("subject")}>Subject</label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    {...fieldProps("phone")}
+                    className={inputClass}
+                  />
+                  <label className={labelClass("phone")}>Phone Number</label>
+                </div>
               </div>
 
               <div className="relative mt-5">
@@ -324,9 +378,9 @@ export default function ContactPage() {
 
               <motion.button
                 type="submit"
-                disabled={submitted}
-                whileHover={{ scale: submitted ? 1 : 1.02 }}
-                whileTap={{ scale: submitted ? 1 : 0.98 }}
+                disabled={submitted || submitting}
+                whileHover={{ scale: submitted || submitting ? 1 : 1.02 }}
+                whileTap={{ scale: submitted || submitting ? 1 : 0.98 }}
                 className="group relative mt-8 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-orange-500/20 transition-shadow hover:shadow-orange-500/40 disabled:opacity-80 md:w-auto md:px-10"
               >
                 <AnimatePresence mode="wait">
@@ -340,6 +394,17 @@ export default function ContactPage() {
                     >
                       <Check size={18} />
                       Message Sent!
+                    </motion.span>
+                  ) : submitting ? (
+                    <motion.span
+                      key="sending"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="flex items-center gap-2"
+                    >
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                      Sending...
                     </motion.span>
                   ) : (
                     <motion.span
@@ -357,6 +422,16 @@ export default function ContactPage() {
                 {/* Shine effect */}
                 <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full" />
               </motion.button>
+
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+                >
+                  {error}
+                </motion.p>
+              )}
             </div>
           </motion.form>
 
