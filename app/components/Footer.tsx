@@ -2,9 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowUpRight, MoveUp, Mail } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpRight, MoveUp, Mail, Check, Loader2 } from "lucide-react";
+import { useState } from "react";
 import appIcon from "../icon.png";
+
+const HUBSPOT_PORTAL_ID = "245955825";
+const HUBSPOT_NEWSLETTER_FORM_ID = "82164711-3c79-4504-b998-fa9a9da215eb";
 
 // Custom Brand Icons matching Lucide's style
 const InstagramIcon = ({ size = 24, className }: { size?: number; className?: string }) => (
@@ -94,28 +98,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="w-full max-w-md"
-          >
-            <form className="relative flex items-center group">
-              <Mail className="absolute left-4 text-white/40 group-focus-within:text-orange-500 transition-colors" size={20} />
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="w-full bg-white/[0.03] border border-white/10 rounded-full py-4 pl-12 pr-32 text-white placeholder:text-white/30 focus:outline-none focus:border-orange-500/50 focus:bg-white/[0.05] transition-all"
-                required
-              />
-              <button 
-                type="submit"
-                className="absolute right-2 rounded-full bg-orange-500 hover:bg-orange-400 text-black font-bold text-sm px-6 py-2.5 transition-transform active:scale-95"
-              >
-                Subscribe
-              </button>
-            </form>
-          </motion.div>
+          <NewsletterForm />
         </div>
 
         {/* Middle Section: Links Grid */}
@@ -214,5 +197,121 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (status === "loading") return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrorMsg("Please enter a valid email");
+      setStatus("error");
+      return;
+    }
+
+    setStatus("loading");
+    setErrorMsg(null);
+
+    try {
+      const res = await fetch(
+        `https://api.hsforms.com/submissions/v3/integration/submit/${HUBSPOT_PORTAL_ID}/${HUBSPOT_NEWSLETTER_FORM_ID}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fields: [{ objectTypeId: "0-1", name: "email", value: email }],
+            context: {
+              pageUri: typeof window !== "undefined" ? window.location.href : "",
+              pageName: "Front Runner Newsletter",
+            },
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message || "Subscription failed");
+      }
+
+      setStatus("success");
+      setEmail("");
+      setTimeout(() => setStatus("idle"), 4000);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong");
+      setStatus("error");
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      className="w-full max-w-md"
+    >
+      <form onSubmit={handleSubmit} className="relative flex items-center group">
+        <Mail
+          className="absolute left-4 text-white/40 group-focus-within:text-orange-500 transition-colors"
+          size={20}
+        />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (status === "error") {
+              setStatus("idle");
+              setErrorMsg(null);
+            }
+          }}
+          placeholder="Enter your email"
+          disabled={status === "loading" || status === "success"}
+          className="w-full bg-white/[0.03] border border-white/10 rounded-full py-4 pl-12 pr-32 text-white placeholder:text-white/30 focus:outline-none focus:border-orange-500/50 focus:bg-white/[0.05] transition-all disabled:opacity-70"
+          required
+        />
+        <button
+          type="submit"
+          disabled={status === "loading" || status === "success"}
+          className="absolute right-2 flex items-center gap-1.5 rounded-full bg-orange-500 hover:bg-orange-400 disabled:bg-orange-500/60 disabled:cursor-not-allowed text-black font-bold text-sm px-6 py-2.5 transition-transform active:scale-95"
+        >
+          {status === "loading" ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : status === "success" ? (
+            <>
+              <Check size={16} /> Subscribed
+            </>
+          ) : (
+            "Subscribe"
+          )}
+        </button>
+      </form>
+      <AnimatePresence>
+        {status === "error" && errorMsg && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="mt-2 pl-4 text-sm text-red-400"
+          >
+            {errorMsg}
+          </motion.p>
+        )}
+        {status === "success" && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="mt-2 pl-4 text-sm text-emerald-400"
+          >
+            Welcome to the Front Runner club!
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
