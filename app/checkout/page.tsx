@@ -242,7 +242,7 @@ export default function CheckoutPage() {
   const progressPct = (stepIndex / 3) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-950 to-neutral-900 pt-[72px]">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-b from-neutral-950 via-neutral-950 to-neutral-900 pt-[72px]">
       {/* Ambient gradient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />
@@ -406,19 +406,19 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setSummaryOpen((o) => !o)}
-                  className="mb-3 flex w-full items-center justify-between gap-3 text-left lg:pointer-events-none lg:mb-5"
+                  className="mb-3 flex w-full items-center justify-between gap-2 text-left lg:pointer-events-none lg:mb-5"
                   aria-expanded={summaryOpen}
                 >
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold tracking-tight text-white sm:text-lg">
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <h2 className="truncate text-base font-bold tracking-tight text-white sm:text-lg">
                       Order Summary
                     </h2>
-                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-white/60 sm:px-2.5 sm:py-1 sm:text-xs">
+                    <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-white/60 sm:px-2.5 sm:py-1 sm:text-xs">
                       {items.length} {items.length === 1 ? "item" : "items"}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 lg:hidden">
-                    <span className="text-base font-black tracking-tight text-white">
+                  <div className="flex shrink-0 items-center gap-2 lg:hidden">
+                    <span className="text-sm font-black tracking-tight text-white sm:text-base">
                       {formatINR(total)}
                     </span>
                     <motion.span

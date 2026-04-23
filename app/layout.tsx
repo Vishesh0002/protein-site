@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-neutral-950 text-white">
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-neutral-950 text-white">
         <SmoothScroll />
         <Navbar />
         <CartDrawer />
