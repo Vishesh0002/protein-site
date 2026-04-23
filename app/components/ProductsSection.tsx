@@ -112,7 +112,12 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   const [activeFlavour, setActiveFlavour] = useState(0);
   const { addItem, openCart } = useCart();
   const { toggleItem: toggleWishlist, has: inWishlist } = useWishlist();
-  const liked = inWishlist(product.id);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+  const liked = mounted && inWishlist(product.id);
 
   const hasFlavours = product.flavours && product.flavours.length > 0;
   const activeImage = product.image;

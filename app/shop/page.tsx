@@ -8,6 +8,7 @@ import {
   Heart,
   Search,
   ShoppingBag,
+  SlidersHorizontal,
   Sparkles,
   Star,
   X,
@@ -378,6 +379,27 @@ function ShopPageInner() {
       prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
     );
 
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    if (filtersOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [filtersOpen]);
+
+  const activeFilterCount =
+    selectedGoals.length +
+    selectedCompanies.length +
+    (minRating ? 1 : 0) +
+    (minDiscount ? 1 : 0) +
+    (inStockOnly ? 1 : 0) +
+    (priceMax < 10000 ? 1 : 0);
+
   const resetFilters = () => {
     setQuery("");
     setSortBy("featured");
@@ -468,22 +490,67 @@ function ShopPageInner() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-          {/* Sidebar Filters */}
-          <aside className="lg:sticky lg:top-[88px] lg:h-fit">
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.01]">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                <h3 className="flex items-center gap-2 text-sm font-bold text-white">
-                  <Sparkles size={14} className="text-orange-400" />
-                  Filters
-                </h3>
-                <button
-                  onClick={resetFilters}
-                  className="rounded-md border border-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition-all hover:border-orange-500/50 hover:text-orange-300"
-                >
-                  Reset
-                </button>
+        {/* Mobile backdrop */}
+        <AnimatePresence>
+          {filtersOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setFiltersOpen(false)}
+              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
+            />
+          )}
+        </AnimatePresence>
+
+        <div className="grid min-w-0 gap-6 lg:grid-cols-[260px_1fr]">
+          {/* Sidebar Filters — becomes a slide-in drawer on mobile */}
+          <aside
+            className={`${
+              filtersOpen
+                ? "fixed inset-y-0 left-0 z-50 flex w-[88%] max-w-[360px] translate-x-0 flex-col transition-transform duration-300 ease-out"
+                : "fixed inset-y-0 left-0 z-50 flex w-[88%] max-w-[360px] -translate-x-full flex-col transition-transform duration-300 ease-out pointer-events-none"
+            } lg:static lg:z-auto lg:flex lg:w-auto lg:max-w-none lg:translate-x-0 lg:transform-none lg:pointer-events-auto lg:sticky lg:top-[88px] lg:h-fit lg:transition-none`}
+          >
+            <div className="flex h-full w-full flex-col overflow-hidden border-r border-white/10 bg-gradient-to-b from-neutral-950 to-neutral-900 shadow-2xl lg:h-auto lg:rounded-2xl lg:border lg:border-white/10 lg:bg-gradient-to-br lg:from-white/[0.04] lg:to-white/[0.01] lg:shadow-none">
+              {/* Header (desktop + mobile) */}
+              <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3.5 lg:py-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/20 to-orange-500/5 ring-1 ring-orange-500/30 lg:hidden">
+                    <SlidersHorizontal size={14} className="text-orange-400" />
+                  </div>
+                  <div>
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-white">
+                      <Sparkles size={14} className="hidden text-orange-400 lg:inline" />
+                      Filters
+                    </h3>
+                    <p className="text-[10px] text-white/50 lg:hidden">
+                      {activeFilterCount > 0
+                        ? `${activeFilterCount} active`
+                        : "Refine your results"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={resetFilters}
+                    className="rounded-md border border-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition-all hover:border-orange-500/50 hover:text-orange-300"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    onClick={() => setFiltersOpen(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-90 lg:hidden"
+                    aria-label="Close filters"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
+
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto overscroll-contain lg:overflow-visible">
 
               <Accordion title="Sort By">
                 <div className="space-y-1.5">
@@ -642,6 +709,20 @@ function ShopPageInner() {
                   />
                 </div>
               </Accordion>
+
+              {/* bottom spacer so content isn't hidden behind sticky CTA on mobile */}
+              <div className="h-20 lg:hidden" />
+              </div>
+
+              {/* Mobile sticky CTA */}
+              <div className="shrink-0 border-t border-white/10 bg-neutral-950/95 p-3 backdrop-blur lg:hidden">
+                <button
+                  onClick={() => setFiltersOpen(false)}
+                  className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/30 transition-all hover:shadow-orange-500/50 active:scale-[0.98]"
+                >
+                  Show {filtered.length} {filtered.length === 1 ? "product" : "products"}
+                </button>
+              </div>
             </div>
           </aside>
 
@@ -678,11 +759,23 @@ function ShopPageInner() {
               </div>
             </motion.div>
 
-            {/* Results count */}
-            <div className="mb-4 flex items-center justify-between">
+            {/* Results count + mobile filter trigger */}
+            <div className="mb-4 flex items-center justify-between gap-3">
               <p className="text-xs font-bold uppercase tracking-wider text-white/60">
                 <span className="text-white">{filtered.length}</span> products available
               </p>
+              <button
+                onClick={() => setFiltersOpen(true)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-white/80 transition-all hover:border-orange-500/40 hover:bg-orange-500/10 hover:text-orange-300 lg:hidden"
+              >
+                <SlidersHorizontal size={13} />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[9px] font-black text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Products */}

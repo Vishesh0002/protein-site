@@ -72,7 +72,7 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className={`fixed top-0 left-0 right-0 z-50 px-6 transition-all duration-300 ${scrolled
+        className={`fixed top-0 left-0 right-0 z-50 px-3 transition-all duration-300 sm:px-6 ${scrolled
             ? "bg-neutral-950/85 shadow-[0_4px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl"
             : "bg-transparent"
           }`}
@@ -83,9 +83,9 @@ export default function Navbar() {
           <Link
             href="/"
             onClick={() => setActiveLink("")}
-            className="group flex shrink-0 items-center gap-3"
+            className="group mr-2 flex shrink-0 items-center gap-2 sm:mr-0 sm:gap-3"
           >
-            <div className="flex h-12 w-12 items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105">
+            <div className="flex h-9 w-9 items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105 sm:h-12 sm:w-12">
               <Image
                 src={appIcon}
                 alt="Front Runner Health Care logo"
@@ -96,10 +96,10 @@ export default function Navbar() {
               />
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-[15px] font-extrabold leading-none tracking-[0.04em] text-orange-500">
+              <span className="text-[13px] font-extrabold leading-none tracking-[0.04em] text-orange-500 sm:text-[15px]">
                 FRONT RUNNER
               </span>
-              <span className="mt-1 text-[11px] font-medium uppercase leading-none tracking-[0.32em] text-white/45">
+              <span className="mt-1 text-[9px] font-medium uppercase leading-none tracking-[0.22em] text-white/45 sm:text-[11px] sm:tracking-[0.32em]">
                 Health Care
               </span>
             </div>

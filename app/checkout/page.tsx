@@ -270,7 +270,7 @@ export default function CheckoutPage() {
 
         <div className="grid gap-6 lg:grid-cols-[1fr,400px] lg:gap-8">
           {/* Main Content */}
-          <div className="order-2 space-y-5 sm:space-y-6 lg:order-1">
+          <div className="order-2 min-w-0 space-y-5 sm:space-y-6 lg:order-1">
             {/* Progress Steps */}
             <div className="relative">
               {/* Progress line background */}
@@ -392,7 +392,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order Summary Sidebar */}
-          <div className="order-1 lg:order-2 lg:sticky lg:top-[88px] lg:h-fit">
+          <div className="order-1 min-w-0 lg:order-2 lg:sticky lg:top-[88px] lg:h-fit">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
