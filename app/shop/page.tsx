@@ -18,7 +18,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useCart, formatINR } from "../lib/store/cart";
+import { useWishlist } from "../lib/store/wishlist";
 import { BRANDS, findBrandBySlug } from "../lib/brands";
+
+type Flavour = { label: string; image?: string };
 
 type Product = {
   id: string;
@@ -34,67 +37,292 @@ type Product = {
   inStock: boolean;
   goal: string;
   Brands: string;
+  flavours?: Flavour[];
 };
 
 const PRODUCTS: Product[] = [
   {
-    id: "product-1",
+    id: "ps-product-1",
     title: "Body Mass Gainer",
-    variant: "3 kg · Chocolate",
+    variant: "2.75 kg",
     tag: "Bulk Up",
     goal: "Weight Gain",
-    image: "/image/1.png",
-    price: 4599,
-    mrp: 4599,
+    image: "/image/muscle/mf2.png",
+    price: 3700,
+    mrp: 4180,
     badge: "Best Seller",
     rating: 4.8,
-    reviews: 1243,
+    reviews: 987,
     inStock: true,
-    Brands: "Front Runner",
+    Brands: "Muscle Frame Nutrition",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
   },
   {
-    id: "product-2",
+    id: "ps-product-2",
     title: "Whey Protein 100%",
-    variant: "1 kg · Rich Chocolate",
+    variant: "1 kg",
     tag: "Recovery",
     goal: "Muscle Building",
-    image: "/image/2.png",
-    price: 1199,
-    mrp: 1499,
-    badge: "Trending",
-    rating: 4.9,
-    reviews: 2871,
+    image: "/image/athletic/2.png",
+    price: 4100,
+    mrp: 4200,
+    badge: "Limited",
+    rating: 4.7,
+    reviews: 654,
     inStock: true,
-    Brands: "Front Runner",
+    Brands: "Athletic Nutrition",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
   },
   {
-    id: "product-3",
+    id: "ps-product-3",
+    title: "Weight Gainer",
+    variant: "2.7 kg",
+    tag: "Bulk Up",
+    goal: "Weight Gain",
+    image: "/image/biomax/bm2.png",
+    price: 3200,
+    mrp: 3795,
+    badge: "New",
+    rating: 4.5,
+    reviews: 312,
+    inStock: true,
+    Brands: "Bio Max",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
+  },
+  {
+    id: "ps-product-5",
     title: "Pre Workout",
-    variant: "300 g · Tropical Blast",
+    variant: "250 gm",
     tag: "Performance",
     goal: "Performance",
-    image: "/image/3.png?v=2",
-    price: 2299,
-    mrp: 2999,
-    rating: 4.7,
-    reviews: 892,
-    inStock: true,
-    Brands: "Front Runner",
-  },
-  {
-    id: "product-4",
-    title: "Nitro Blast",
-    variant: "200 tablets · Daily",
-    tag: "Daily Health",
-    goal: "Daily Health",
-    image: "/image/4.png",
-    price: 799,
-    mrp: 999,
+    image: "/image/athletic/3.png",
+    price: 1650,
+    mrp: 1880,
     badge: "New",
     rating: 4.6,
-    reviews: 421,
+    reviews: 203,
     inStock: true,
-    Brands: "Front Runner",
+    Brands: "Athletic Nutrition",
+    flavours: [
+      { label: "Blue Razz" },
+      { label: "Watermelon" },
+    ],
+  },
+  {
+    id: "ps-product-4",
+    title: "Body Mass Gainer",
+    variant: "2.75 kg",
+    tag: "Bulk Up",
+    goal: "Weight Gain",
+    image: "/image/muscle/mf1.png",
+    price: 3700,
+    mrp: 4180,
+    badge: "Best Seller",
+    rating: 4.8,
+    reviews: 987,
+    inStock: true,
+    Brands: "Muscle Frame Nutrition",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
+  },
+  {
+    id: "ps-product-6",
+    title: "Ultra Pre Workout",
+    variant: "250 gm",
+    tag: "Performance",
+    goal: "Performance",
+    image: "/image/muscle/mf3.png",
+    price: 2000,
+    mrp: 2150,
+    rating: 4.6,
+    reviews: 318,
+    inStock: true,
+    Brands: "Muscle Frame Nutrition",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Cookies & Cream" },
+    ],
+  },
+  {
+    id: "ps-product-7",
+    title: "Premium Body Mass Gainer",
+    variant: "2.75 kg",
+    tag: "Bulk Up",
+    goal: "Weight Gain",
+    image: "/image/muscle/mf4.png",
+    price: 3500,
+    mrp: 3960,
+    badge: "Premium",
+    rating: 4.5,
+    reviews: 189,
+    inStock: true,
+    Brands: "Muscle Frame Nutrition",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Vanilla" },
+    ],
+  },
+  {
+    id: "ps-product-8",
+    title: "Nitric Oxide Capsules ",
+    variant: "60 Unit",
+    tag: "Daily Health",
+    goal: "Daily Health",
+    image: "/image/biomax/bm1.png",
+    price: 2200,
+    mrp: 2230,
+    rating: 4.4,
+    reviews: 276,
+    inStock: true,
+    Brands: "Bio Max",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
+  },
+  {
+    id: "ps-product-9",
+    title: "Black Spider Capsule",
+    variant: "60 Unit",
+    tag: "Perfomance",
+    goal: "Performance",
+    image: "/image/biomax/bm3.png",
+    price: 1700,
+    mrp: 1880,
+    badge: "New",
+    rating: 4.3,
+    reviews: 142,
+    inStock: true,
+    Brands: "Bio Max",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Banana" },
+    ],
+  },
+  {
+    id: "ps-product-10",
+    title: "Body Mass Gainer",
+    variant: "2.75 kg",
+    tag: "Bulk Up",
+    goal: "Weight Gain",
+    image: "/image/athletic/1.png",
+    price: 3650,
+    mrp: 3795,
+    badge: "Best Seller",
+    rating: 4.8,
+    reviews: 893,
+    inStock: true,
+    Brands: "Athletic Nutrition",
+    flavours: [
+      { label: "Rich Chocolate" },
+      { label: "Vanilla Ice Cream" },
+    ],
+  },
+  {
+    id: "ps-product-11",
+    title: "XXL Mass Gainer",
+    variant: "2.75 kg",
+    tag: "Bulk Up",
+    goal: "Weight Gain",
+    image: "/image/athletic/4.png",
+    price: 3800,
+    mrp: 3995,
+    rating: 4.5,
+    reviews: 407,
+    inStock: true,
+    Brands: "Athletic Nutrition",
+    flavours: [
+      { label: "Watermelon" },
+      { label: "Green Apple" },
+    ],
+  },
+  {
+    id: "ps-product-12",
+    title: "Whey Protein Isolate 100%",
+    variant: "1 kg",
+    tag: "Recovery",
+    goal: "Muscle Building",
+    image: "/image/Fitnesstech/fn1.png",
+    price: 5450,
+    mrp: 5500,
+    badge: "Trending",
+    rating: 4.6,
+    reviews: 334,
+    inStock: true,
+    Brands: "FitnessTech Nutrition",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Vanilla" },
+    ],
+  },
+  {
+    id: "ps-product-13",
+    title: "Whey Protein 100%",
+    variant: "1 kg",
+    tag: "Recovery",
+    goal: "Muscle Building",
+    image: "/image/Fitnesstech/fn3.png",
+    price: 4200,
+    mrp: 4200,
+    badge: "New",
+    rating: 4.7,
+    reviews: 512,
+    inStock: true,
+    Brands: "FitnessTech Nutrition",
+    flavours: [
+      { label: "Chocolate", image: "/image/Fitnesstech/fn2.png" },
+      { label: "Malai Kulfi", image: "/image/Fitnesstech/fn3.png" },
+    ],
+  },
+  {
+    id: "ps-product-14",
+    title: "Premium Max Gainer",
+    variant: "2.7 kg",
+    tag: "Bulk Up",
+    goal: "Weight Gain",
+    image: "/image/maximum/mn1.png",
+    price: 3800,
+    mrp: 3996,
+    badge: "Best Seller",
+    rating: 4.9,
+    reviews: 1102,
+    inStock: true,
+    Brands: "Maximum Nutrition",
+    flavours: [
+      { label: "Double Rich Chocolate" },
+      { label: "French Vanilla" },
+    ],
+  },
+  {
+    id: "ps-product-15",
+    title: "Premium Mass Gainer",
+    variant: "2.7 kg",
+    tag: "Bulk Up",
+    goal: "Weight Gain",
+    image: "/image/maximum/mn2.png",
+    price: 4158,
+    mrp: 4158,
+    badge: "Best Seller",
+    rating: 4.7,
+    reviews: 688,
+    inStock: true,
+    Brands: "Maximum Nutrition",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Banana" },
+      { label: "Vanilla" },
+    ],
   },
 ];
 
@@ -131,7 +359,7 @@ function ShopPageInner() {
   const [minDiscount, setMinDiscount] = useState(0);
   const [minRating, setMinRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [priceMax, setPriceMax] = useState(5000);
+  const [priceMax, setPriceMax] = useState(10000);
 
   // Sync when URL brand param changes
   useEffect(() => {
@@ -158,7 +386,7 @@ function ShopPageInner() {
     setMinDiscount(0);
     setMinRating(0);
     setInStockOnly(false);
-    setPriceMax(5000);
+    setPriceMax(10000);
   };
 
   const filtered = useMemo(() => {
@@ -406,7 +634,7 @@ function ShopPageInner() {
                   <input
                     type="range"
                     min={500}
-                    max={5000}
+                    max={10000}
                     step={100}
                     value={priceMax}
                     onChange={(e) => setPriceMax(Number(e.target.value))}
@@ -536,6 +764,7 @@ function Accordion({
   const [open, setOpen] = useState(defaultOpen);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (forceOpen) setOpen(true);
   }, [forceOpen]);
 
@@ -599,10 +828,16 @@ function RadioPill({
 }
 
 function ProductCard({ product, index }: { product: Product; index: number }) {
-  const [liked, setLiked] = useState(false);
   const [added, setAdded] = useState(false);
-  const { addItem, openCart } = useCart();
+  const { addItem } = useCart();
+  const { toggleItem: toggleWishlist, has: inWishlist } = useWishlist();
+  const liked = inWishlist(product.id);
   const router = useRouter();
+
+  const hasFlavours = product.flavours && product.flavours.length > 0;
+  const [activeFlavour, setActiveFlavour] = useState(0);
+  const activeImage = (hasFlavours && product.flavours![activeFlavour].image) ? product.flavours![activeFlavour].image! : product.image;
+  const activeVariant = product.variant;
 
   const discount =
     product.mrp > product.price
@@ -612,8 +847,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   const handleAdd = () => {
     addItem({
       id: product.id,
-      title: product.title,
-      image: product.image,
+      title: `${product.title} – ${hasFlavours ? product.flavours![activeFlavour].label : product.variant}`,
+      image: activeImage,
       price: product.price,
       mrp: product.mrp,
     });
@@ -624,8 +859,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   const handleBuyNow = () => {
     addItem({
       id: product.id,
-      title: product.title,
-      image: product.image,
+      title: `${product.title} – ${hasFlavours ? product.flavours![activeFlavour].label : product.variant}`,
+      image: activeImage,
       price: product.price,
       mrp: product.mrp,
     });
@@ -652,10 +887,10 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             </span>
           )}
           <Image
-            src={product.image}
+            src={activeImage}
             alt={product.title}
             fill
-            className="object-contain p-3 transition-transform duration-500 group-hover:scale-110"
+            className="object-contain p-3 transition-all duration-500 group-hover:scale-110"
             unoptimized
           />
           <div className="absolute left-1.5 bottom-1.5 flex items-center gap-0.5 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
@@ -671,7 +906,18 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
               {product.tag}
             </p>
             <button
-              onClick={() => setLiked((l) => !l)}
+              onClick={() =>
+                toggleWishlist({
+                  id: product.id,
+                  title: hasFlavours
+                    ? `${product.title} – ${product.flavours![activeFlavour].label}`
+                    : product.title,
+                  image: activeImage,
+                  price: product.price,
+                  mrp: product.mrp,
+                })
+              }
+              aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
               className="flex h-6 w-6 items-center justify-center rounded-full text-white/40 transition-all hover:text-red-400 active:scale-90"
             >
               <Heart
@@ -683,7 +929,26 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           <h3 className="mb-1 line-clamp-2 text-sm font-bold text-white">
             {product.title}
           </h3>
-          <p className="mb-2 text-xs text-white/50">{product.variant}</p>
+          <p className="mb-2 text-xs text-white/50">{activeVariant}</p>
+
+          {/* Flavour selector */}
+          {hasFlavours && (
+            <div className="mb-2 flex flex-wrap gap-1">
+              {product.flavours!.map((f, i) => (
+                <button
+                  key={f.label}
+                  onClick={() => setActiveFlavour(i)}
+                  className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-all ${
+                    activeFlavour === i
+                      ? "border-orange-500 bg-orange-500/20 text-orange-300"
+                      : "border-white/15 bg-white/[0.03] text-white/50 hover:border-white/30 hover:text-white/80"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="mt-auto">
             <div className="flex items-baseline gap-1.5">

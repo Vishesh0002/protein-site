@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Calculator,
   ChevronDown,
+  Heart,
   Mail,
   Menu,
   ShoppingBag,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import appIcon from "../icon.png";
 import { useCart } from "../lib/store/cart";
+import { useWishlist } from "../lib/store/wishlist";
 import { BRANDS } from "../lib/brands";
 
 const navItems = [
@@ -37,9 +39,12 @@ export default function Navbar() {
   const [mobileBrandsOpen, setMobileBrandsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { openCart, getItemCount } = useCart();
+  const wishlistCount = useWishlist((s) => s.items.length);
   const itemCount = mounted ? getItemCount() : 0;
+  const wishCount = mounted ? wishlistCount : 0;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -150,6 +155,29 @@ export default function Navbar() {
             >
               <Mail size={13} />
               Contact Us
+            </Link>
+
+            {/* Wishlist */}
+            <Link
+              href="/wishlist"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/70 transition-all duration-200 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 active:scale-[0.96]"
+              aria-label="Wishlist"
+            >
+              <Heart size={16} className={wishCount > 0 ? "fill-red-500 text-red-500" : ""} />
+              <AnimatePresence>
+                {wishCount > 0 && (
+                  <motion.span
+                    key={wishCount}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                    className="absolute -top-1.5 -right-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-neutral-950 bg-red-500 text-[10px] font-black text-white"
+                  >
+                    {wishCount > 9 ? "9+" : wishCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
 
             {/* Cart */}

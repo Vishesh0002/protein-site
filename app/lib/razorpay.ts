@@ -1,6 +1,13 @@
+interface RazorpayInstance {
+  open: () => void;
+  close?: () => void;
+}
+
+type RazorpayConstructor = new (options: RazorpayOptions) => RazorpayInstance;
+
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: RazorpayConstructor;
   }
 }
 

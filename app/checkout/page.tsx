@@ -2,23 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
   Check,
-  ChevronRight,
   CreditCard,
   Mail,
   MapPin,
   Package,
-  Phone,
   ShieldCheck,
   ShoppingBag,
+  Tag,
   Trash2,
   User,
+  X,
 } from "lucide-react";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import PhoneInput from "../components/PhoneInput";
@@ -49,13 +48,36 @@ interface CheckoutData {
 }
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { items, updateQty, removeItem, getSubtotal, clearCart } = useCart();
   const [step, setStep] = useState<CheckoutStep>("cart");
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Coupon state
+  const COUPONS: Record<string, number> = { FAMILY: 50 };
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  const applyCoupon = () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    if (!(code in COUPONS)) {
+      setCouponError("Invalid coupon code");
+      setAppliedCoupon(null);
+      return;
+    }
+    setAppliedCoupon(code);
+    setCouponError(null);
+    setCouponInput("");
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError(null);
+  };
 
   const [checkoutData, setCheckoutData] = useState<CheckoutData>({
     email: "",
@@ -73,8 +95,11 @@ export default function CheckoutPage() {
 
   const subtotal = getSubtotal();
   // Must match backend logic in orders.service.ts
-  const shipping = subtotal >= 2000 ? 0 : 50;
-  const total = subtotal + shipping;
+  const discountPct = appliedCoupon ? COUPONS[appliedCoupon] : 0;
+  const discount = Math.round((subtotal * discountPct) / 100);
+  const discountedSubtotal = subtotal - discount;
+  const shipping = discountedSubtotal >= 2000 ? 0 : 50;
+  const total = discountedSubtotal + shipping;
 
   // Redirect if cart is empty and not complete
   if (items.length === 0 && !orderComplete) {
@@ -134,6 +159,7 @@ export default function CheckoutPage() {
         guestEmail: checkoutData.email,
         guestName: `${checkoutData.firstName} ${checkoutData.lastName}`.trim(),
         guestPhone: checkoutData.phone,
+        coupon: appliedCoupon ?? undefined,
       });
 
       // 3. Open Razorpay modal
@@ -160,8 +186,9 @@ export default function CheckoutPage() {
             setOrderId(orderRes.orderId);
             setOrderComplete(true);
             clearCart();
-          } catch (err: any) {
-            setError(err.message || "Payment verification failed");
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : "Payment verification failed";
+            setError(msg);
           } finally {
             setIsProcessing(false);
           }
@@ -170,8 +197,9 @@ export default function CheckoutPage() {
           ondismiss: () => setIsProcessing(false),
         },
       });
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Something went wrong";
+      setError(msg);
       setIsProcessing(false);
     }
   };
@@ -412,11 +440,83 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
+                {/* Coupon */}
+                <div className="mb-4 border-t border-white/10 pt-4">
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5">
+                      <div className="flex items-center gap-2">
+                        <Tag size={14} className="text-emerald-400" />
+                        <div>
+                          <p className="text-xs font-bold text-emerald-300">{appliedCoupon} applied</p>
+                          <p className="text-[10px] text-emerald-400/70">
+                            {COUPONS[appliedCoupon]}% off · -{formatINR(discount)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={removeCoupon}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-emerald-300/70 transition-colors hover:bg-emerald-500/20 hover:text-emerald-200"
+                        aria-label="Remove coupon"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                          <input
+                            type="text"
+                            value={couponInput}
+                            onChange={(e) => {
+                              setCouponInput(e.target.value);
+                              if (couponError) setCouponError(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                applyCoupon();
+                              }
+                            }}
+                            placeholder="Coupon code"
+                            className={`w-full rounded-xl border bg-white/[0.03] py-2 pl-9 pr-3 text-sm uppercase tracking-wider text-white placeholder:text-white/30 placeholder:normal-case placeholder:tracking-normal focus:outline-none ${
+                              couponError
+                                ? "border-red-500/50 focus:border-red-500"
+                                : "border-white/10 focus:border-orange-500/50"
+                            }`}
+                          />
+                        </div>
+                        <button
+                          onClick={applyCoupon}
+                          disabled={!couponInput.trim()}
+                          className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {couponError && (
+                        <p className="mt-1.5 text-xs text-red-400">{couponError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2.5 border-t border-white/10 pt-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-white/60">Subtotal</span>
                     <span className="font-medium text-white">{formatINR(subtotal)}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-emerald-400/80">
+                        Discount ({appliedCoupon})
+                      </span>
+                      <span className="font-medium text-emerald-400">
+                        -{formatINR(discount)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-white/60">Shipping</span>
                     <span
