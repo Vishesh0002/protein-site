@@ -13,6 +13,9 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { useCart } from "../lib/store/cart";
+import { useWishlist } from "../lib/store/wishlist";
+
+type Flavour = { label: string };
 
 type Product = {
   id: string;
@@ -24,47 +27,79 @@ type Product = {
   mrp: number;
   badge?: string;
   note?: string;
+  flavours?: Flavour[];
 };
 
 const products: Product[] = [
   {
     id: "product-1",
-    title: "Body Mass Gainer",
+    title: "Body Mass Gainer (2.75kg)",
     tag: "Bulk Up",
-    image: "/image/1.png",
+    image: "/image/muscle/mf2.png",
     gradient: "from-orange-500/30 via-orange-600/20 to-amber-500/10",
-    price: 4599,
-    mrp: 4599,
+    price: 3700,
+    mrp: 4180,
     badge: "Best Seller",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
   },
   {
     id: "product-2",
-    title: "Whey Protein 100%",
+    title: "Whey Protein 100% (1kg)",
     tag: "Recovery",
-    image: "/image/2.png",
+    image: "/image/athletic/2.png",
     gradient: "from-purple-500/25 via-pink-500/15 to-orange-500/10",
-    price: 1199,
-    mrp: 1499,
+    price: 4100,
+    mrp: 4200,
     badge: "Limited",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
   },
   {
     id: "product-3",
-    title: "Pre Workout",
-    tag: "Perfomance",
-    image: "/image/3.png?v=2",
+    title: "Weight Gainer (2.7kg)",
+    tag: "Bulk Up",
+    image: "/image/biomax/bm2.png",
     gradient: "from-amber-500/30 via-yellow-500/20 to-orange-600/10",
-    price: 2299,
-    mrp: 2999,
+    price: 3200,
+    mrp: 3795,
+    badge: "New",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
   },
   {
     id: "product-4",
-    title: "Nitro Blast",
-    tag: "Daily Health",
-    image: "/image/4.png",
+    title: "Body Mass Gainer (2.75kg)",
+    tag: "Bulk Up",
+    image: "/image/muscle/mf1.png",
     gradient: "from-emerald-500/25 via-teal-500/15 to-cyan-500/10",
-    price: 799,
-    mrp: 999,
+    price: 3700,
+    mrp: 4180,
+    badge: "Best Seller",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
+  },
+  {
+    id: "product-5",
+    title: "Pre Workout (250gm)",
+    tag: "Energy",
+    image: "/image/athletic/3.png",
+    gradient: "from-purple-500/25 via-pink-500/15 to-orange-500/10",
+    price: 1650,
+    mrp: 1880,
     badge: "New",
+    flavours: [
+      { label: "Chocolate" },
+      { label: "Malai Kulfi" },
+    ],
   },
 ];
 
@@ -74,8 +109,14 @@ function formatINR(n: number) {
 
 function ProductCard({ product, index }: { product: Product; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [liked, setLiked] = useState(false);
+  const [activeFlavour, setActiveFlavour] = useState(0);
   const { addItem, openCart } = useCart();
+  const { toggleItem: toggleWishlist, has: inWishlist } = useWishlist();
+  const liked = inWishlist(product.id);
+
+  const hasFlavours = product.flavours && product.flavours.length > 0;
+  const activeImage = product.image;
+  const activeFlavourLabel = hasFlavours ? product.flavours![activeFlavour].label : null;
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -130,8 +171,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-110"
           >
             <Image
-              key={product.image}
-              src={product.image}
+              key={activeImage}
+              src={activeImage}
               alt={product.title}
               width={280}
               height={280}
@@ -150,8 +191,16 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
 
           {/* Wishlist */}
           <button
-            onClick={() => setLiked((v) => !v)}
-            aria-label="Add to wishlist"
+            onClick={() =>
+              toggleWishlist({
+                id: product.id,
+                title: activeFlavourLabel ? `${product.title} – ${activeFlavourLabel}` : product.title,
+                image: activeImage,
+                price: product.price,
+                mrp: product.mrp,
+              })
+            }
+            aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
             className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-neutral-950/50 text-white/70 backdrop-blur-md transition-all hover:border-orange-500/40 hover:text-orange-400"
           >
             <Heart
@@ -171,9 +220,28 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           </div>
 
           {/* Title */}
-          <h3 className="mb-4 line-clamp-2 min-h-[3rem] text-base font-bold leading-snug text-white transition-colors group-hover:text-orange-300">
+          <h3 className="mb-2 line-clamp-2 min-h-[3rem] text-base font-bold leading-snug text-white transition-colors group-hover:text-orange-300">
             {product.title}
           </h3>
+
+          {/* Flavour selector */}
+          {hasFlavours && (
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {product.flavours!.map((f, i) => (
+                <button
+                  key={f.label}
+                  onClick={() => setActiveFlavour(i)}
+                  className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-all ${
+                    activeFlavour === i
+                      ? "border-orange-500 bg-orange-500/20 text-orange-300"
+                      : "border-white/15 bg-white/[0.03] text-white/50 hover:border-white/30 hover:text-white/80"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Pricing */}
           <div className="mb-3 flex items-end justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
@@ -214,8 +282,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
               onClick={() => {
                 addItem({
                   id: product.id,
-                  title: product.title,
-                  image: product.image,
+                  title: activeFlavourLabel ? `${product.title} – ${activeFlavourLabel}` : product.title,
+                  image: activeImage,
                   price: product.price,
                   mrp: product.mrp,
                 });
@@ -231,8 +299,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
               onClick={() =>
                 addItem({
                   id: product.id,
-                  title: product.title,
-                  image: product.image,
+                  title: activeFlavourLabel ? `${product.title} – ${activeFlavourLabel}` : product.title,
+                  image: activeImage,
                   price: product.price,
                   mrp: product.mrp,
                 })

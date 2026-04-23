@@ -11,32 +11,39 @@ export type Brand = {
 
 export const BRANDS: Brand[] = [
   {
-    name: "Front Runner",
-    slug: "front-runner",
-    image: "/image/2.png",
+    name: "Muscle Frame Nutrition",
+    slug: "muscle-frame-nutrition",
+    image: "/image/Brands/logo1.png",
     tagline: "Premium supplements",
     gradient: "from-orange-500/30 to-amber-500/10",
   },
   {
-    name: "MuscleBlaze",
-    slug: "muscleblaze",
-    image: "/image/1.png",
+    name: "Bio Max",
+    slug: "bio-max",
+    image: "/image/Brands/logo2.png",
     tagline: "Mass & strength",
     gradient: "from-red-500/30 to-orange-500/10",
   },
   {
-    name: "Optimum Nutrition",
-    slug: "optimum-nutrition",
-    image: "/image/3.png",
+    name: "Maximum Nutrition",
+    slug: "maximum-nutrition",
+    image: "/image/Brands/logo3.png",
     tagline: "Gold standard whey",
     gradient: "from-yellow-500/30 to-orange-500/10",
   },
   {
-    name: "MyProtein",
-    slug: "myprotein",
-    image: "/image/4.png",
+    name: "FitnessTech Nutrition",
+    slug: "fitnesstech-nutrition",
+    image: "/image/Brands/logo4.png",
     tagline: "Value & quality",
     gradient: "from-emerald-500/30 to-cyan-500/10",
+  },
+  {
+    name: "Athletic Nutrition",
+    slug: "athletic-nutrition",
+    image: "/image/Brands/logo5.png",
+    tagline: "Premium supplements",
+    gradient: "from-orange-500/30 to-amber-500/10",
   },
 ];
 

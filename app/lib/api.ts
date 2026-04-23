@@ -29,6 +29,7 @@ export interface CreateOrderRequest {
   guestEmail?: string;
   guestName?: string;
   guestPhone?: string;
+  coupon?: string;
 }
 
 export interface CreateOrderResponse {
@@ -56,5 +57,5 @@ export const api = {
       { method: "POST", body: JSON.stringify(body) },
     ),
 
-  getProducts: () => request<any[]>("/products"),
+  getProducts: () => request<unknown[]>("/products"),
 };
