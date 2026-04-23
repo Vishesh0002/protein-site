@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
   CreditCard,
   Mail,
   MapPin,
@@ -60,6 +61,8 @@ export default function CheckoutPage() {
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
+  // Mobile-only: controls whether the order summary details are expanded
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   const applyCoupon = () => {
     const code = couponInput.trim().toUpperCase();
@@ -267,7 +270,7 @@ export default function CheckoutPage() {
 
         <div className="grid gap-6 lg:grid-cols-[1fr,400px] lg:gap-8">
           {/* Main Content */}
-          <div className="space-y-5 sm:space-y-6">
+          <div className="order-2 space-y-5 sm:space-y-6 lg:order-1">
             {/* Progress Steps */}
             <div className="relative">
               {/* Progress line background */}
@@ -389,25 +392,47 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order Summary Sidebar */}
-          <div className="lg:sticky lg:top-[88px] lg:h-fit">
+          <div className="order-1 lg:order-2 lg:sticky lg:top-[88px] lg:h-fit">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 shadow-2xl backdrop-blur-sm sm:p-6"
+              className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-white/[0.01] p-4 shadow-2xl backdrop-blur-sm sm:rounded-3xl sm:p-6"
             >
               {/* Glow accent */}
               <div className="pointer-events-none absolute -top-20 -right-20 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
 
               <div className="relative">
-                <div className="mb-5 flex items-center justify-between">
-                  <h2 className="text-lg font-bold tracking-tight text-white">
-                    Order Summary
-                  </h2>
-                  <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/60">
-                    {items.length} {items.length === 1 ? "item" : "items"}
-                  </span>
-                </div>
+                {/* Header: collapsible on mobile, static on desktop. Total is always visible on mobile. */}
+                <button
+                  type="button"
+                  onClick={() => setSummaryOpen((o) => !o)}
+                  className="mb-3 flex w-full items-center justify-between gap-3 text-left lg:pointer-events-none lg:mb-5"
+                  aria-expanded={summaryOpen}
+                >
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-bold tracking-tight text-white sm:text-lg">
+                      Order Summary
+                    </h2>
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-white/60 sm:px-2.5 sm:py-1 sm:text-xs">
+                      {items.length} {items.length === 1 ? "item" : "items"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 lg:hidden">
+                    <span className="text-base font-black tracking-tight text-white">
+                      {formatINR(total)}
+                    </span>
+                    <motion.span
+                      animate={{ rotate: summaryOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-white/5 text-white/70"
+                    >
+                      <ChevronDown size={14} />
+                    </motion.span>
+                  </div>
+                </button>
 
+                {/* Details: hidden on mobile unless expanded, always visible on desktop */}
+                <div className={`${summaryOpen ? "block" : "hidden"} lg:block`}>
                 <div className="mb-5 max-h-[220px] space-y-3 overflow-y-auto pr-1">
                   {items.map((item) => (
                     <motion.div
@@ -552,6 +577,7 @@ export default function CheckoutPage() {
                     <Package size={14} className="mx-auto mb-1 text-orange-400" />
                     <p className="text-[10px] text-white/50">Fast shipping</p>
                   </div>
+                </div>
                 </div>
               </div>
             </motion.div>
