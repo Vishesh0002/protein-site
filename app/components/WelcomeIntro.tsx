@@ -10,20 +10,24 @@ interface WelcomeIntroProps {
 }
 
 export default function WelcomeIntro({ duration = 3200 }: WelcomeIntroProps) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Lock scroll while intro is visible
-    document.body.style.overflow = "hidden";
+    // If already seen in this session, do not show
+    if (sessionStorage.getItem("frontrunner_welcome_intro_seen")) {
+      return;
+    }
+
+    // Mark as seen so it only appears on first landing
+    sessionStorage.setItem("frontrunner_welcome_intro_seen", "true");
+    setVisible(true);
 
     const timer = setTimeout(() => {
       setVisible(false);
-      document.body.style.overflow = "";
     }, duration);
 
     return () => {
       clearTimeout(timer);
-      document.body.style.overflow = "";
     };
   }, [duration]);
 
@@ -34,7 +38,7 @@ export default function WelcomeIntro({ duration = 3200 }: WelcomeIntroProps) {
           key="welcome-intro"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.9, ease: "easeInOut" } }}
-          className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-neutral-950"
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-neutral-950"
         >
           {/* Background glows */}
           <motion.div

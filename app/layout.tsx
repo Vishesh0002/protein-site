@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { CartDrawer } from "./components/CartDrawer";
 import Navbar from "./components/Navbar";
 import SmoothScroll from "./components/SmoothScroll";
+import PageLoader from "./components/PageLoader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,9 +22,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col overflow-x-hidden bg-neutral-950 text-white">
-        <SmoothScroll />
+    <html lang="en" className="antialiased">
+      <body className="min-h-screen flex flex-col bg-neutral-950 text-white">
+        <PageLoader />
         <Navbar />
         <CartDrawer />
         {children}

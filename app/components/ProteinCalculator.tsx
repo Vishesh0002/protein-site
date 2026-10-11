@@ -271,7 +271,7 @@ export default function ProteinCalculator() {
   return (
     <section
       id="protein-calculator"
-      className="relative overflow-hidden bg-neutral-950 py-24 scroll-mt-28"
+      className="relative overflow-hidden bg-neutral-950 pt-28 pb-24 scroll-mt-28"
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-orange-600/10 blur-[120px]" />
@@ -281,8 +281,7 @@ export default function ProteinCalculator() {
       <div className="relative mx-auto max-w-7xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
@@ -305,8 +304,7 @@ export default function ProteinCalculator() {
         <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="space-y-5"
           >

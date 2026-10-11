@@ -1,40 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import Lenis from "lenis";
-
+// Disabled Lenis smooth scroll hijacking to restore native 120Hz hardware-accelerated scrolling without input lag
 export default function SmoothScroll() {
-  useEffect(() => {
-    // Respect users who prefer reduced motion
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-
-    const lenis = new Lenis({
-      lerp: 0.08,
-      duration: 1.6,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.8,
-      syncTouch: true,
-    });
-
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      lenis.destroy();
-    };
-  }, []);
-
   return null;
 }
+

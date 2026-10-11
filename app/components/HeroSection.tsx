@@ -78,7 +78,6 @@ export default function HeroSection() {
 
         {/* Overlays for better text readability */}
         <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015]" />
       </div>
 
       {/* Centered Interactable Content Container */}

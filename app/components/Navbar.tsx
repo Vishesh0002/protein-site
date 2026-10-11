@@ -66,6 +66,10 @@ export default function Navbar() {
     return () => window.removeEventListener("hashchange", syncActiveLink);
   }, [pathname]);
 
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <>
       <motion.nav
@@ -202,15 +206,12 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </button>
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                title="Coming soon"
-                className="hidden lg:flex pointer-events-none relative items-center gap-3 rounded-full bg-orange-600 px-4 py-2 text-sm font-bold text-white"
+              <Link
+                href="/admin"
+                className="hidden lg:flex relative items-center gap-2 rounded-full bg-orange-600 hover:bg-orange-500 px-4 py-2 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]"
               >
                 Login / Sign Up
-              </button>
+              </Link>
             
           
 
@@ -356,15 +357,13 @@ export default function Navbar() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: navItems.length * 0.05 }}
             >
-              <button
-                type="button"
-                disabled
-                aria-disabled="true"
-                title="Coming soon"
-                className="mt-4 flex w-full pointer-events-none items-center justify-center rounded-lg bg-orange-600 py-3 text-lg font-bold text-white"
+              <Link
+                href="/admin"
+                onClick={() => setMenuOpen(false)}
+                className="mt-4 flex w-full items-center justify-center rounded-lg bg-orange-600 hover:bg-orange-500 py-3 text-lg font-bold text-white transition-all"
               >
                 Login / Sign Up
-              </button>
+              </Link>
             </motion.div>
           </motion.div>
         )}
